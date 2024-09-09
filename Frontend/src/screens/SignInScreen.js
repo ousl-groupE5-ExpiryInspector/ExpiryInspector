@@ -1,40 +1,84 @@
-import React from 'react';
-import { View, Text, TouchableOpacity } from 'react-native';
+import React, { useState } from 'react';
+import { Text, TouchableOpacity, View, StyleSheet } from 'react-native';
+import InputFieldCom from '../components/inputField';
+import ButtonComponentAuth from '../components/ButtonComponentAuth';
+import ImageComponentAuth from '../components/ImageComponentAuth';
+import HeaderTextComponent from '../components/HeaderTextComponent';
+import BackgroundFlex from '../components/BackgroundFlex';
 
-export default function SignInScreen({ navigation }) {
-  const handleLogin = () => {
-    // Button click will navigate to the Dashboard
+
+export default function SignUpScreen({ navigation }) {
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+
+  const handleRegister = () => {
     navigation.navigate('Dashboard');
   };
-
+  
   const navigateToLogin = () => {
-    // Redirect to Sign Up screen
     navigation.navigate('Login');
   };
 
-  const navigateToForgotPW = () => {
-    // Redirect to Forgot Password screen
-    navigation.navigate('ForgotPass');
-  };
-
   return (
-    <View style={{ padding: 20 }}>
-      <Text>Sign In Screen</Text>
+    <BackgroundFlex>
+      <HeaderTextComponent title="Register Here" />
+      
+      <ImageComponentAuth source={require('../../assets/cover_signup.png')} />
 
-      <TouchableOpacity onPress={handleLogin}>
-        <Text>signin</Text>
-      </TouchableOpacity>
+      <InputFieldCom 
+        placeholder="Name" 
+        value={name} 
+        onChangeText={setName} 
+      />
+      <InputFieldCom 
+        placeholder="Email" 
+        keyboardType="email-address" 
+        value={email} 
+        onChangeText={setEmail} 
+      />
+      <InputFieldCom 
+        placeholder="Password" 
+        secureTextEntry={true} 
+        value={password} 
+        onChangeText={setPassword} 
+      />
+      <InputFieldCom 
+        placeholder="Confirm Password" 
+        secureTextEntry={true} 
+        value={confirmPassword} 
+        onChangeText={setConfirmPassword} 
+      />
 
-      <TouchableOpacity onPress={navigateToForgotPW}>
-        <Text>Forgot Password</Text>
-      </TouchableOpacity>
+      <ButtonComponentAuth title="Register" onPress={handleRegister} />
 
-      <Text>
-        If you don't have an account, please{' '}
+      <View style={styles.rowContainer}>
+        <Text style={styles.footerText}>
+          If you have an account, please{' '}
+        </Text>
         <TouchableOpacity onPress={navigateToLogin}>
-          <Text>Login here</Text>
+          <Text style={styles.loginText}>Login here</Text>
         </TouchableOpacity>
-      </Text>
-    </View>
+      </View>
+    </BackgroundFlex>
   );
 }
+
+const styles = StyleSheet.create({
+  rowContainer: {
+    flexDirection: 'row',
+    alignItems: 'center', 
+    marginTop: 10, 
+    marginBottom: 30, 
+  },
+  footerText: {
+    color: 'black',
+    fontSize: 16, 
+  },
+  loginText: {
+    color: 'white',
+    fontWeight: 'bold',
+    fontSize: 16,
+  },
+});
