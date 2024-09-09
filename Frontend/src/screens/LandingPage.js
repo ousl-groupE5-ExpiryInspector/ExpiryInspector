@@ -1,5 +1,6 @@
 import React from 'react';
 import { StyleSheet, Text, View, TouchableOpacity, Image } from 'react-native';
+import ButtonComponentAuth from '../components/ButtonComponentAuth';
 
 export default function LandingPage({ navigation }) {
 
@@ -14,9 +15,8 @@ export default function LandingPage({ navigation }) {
       <Image source={require('../../assets/Landing_image.jpg')} style={styles.image} />
       
       <View style={styles.buttonContainer}>
-        <TouchableOpacity style={styles.button} onPress={handleLanding}>
-          <Text style={styles.buttonText}>Get Started</Text>
-        </TouchableOpacity>
+        <ButtonComponentAuth title={'Get Started'} onPress={handleLanding}/>
+      
       </View>
     </View>
   );
@@ -27,12 +27,12 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#FF4913',
     alignItems: 'center',
-    justifyContent: 'space-between', // Space out items
+    justifyContent: 'space-between',
   },
   curvedRectangle: {
     position: 'absolute',
     width: '100%',
-    height: '73%', 
+    height: '69%', 
     backgroundColor: '#cfb5b2', 
     borderBottomRightRadius: 320, 
     top: 0, 
@@ -40,7 +40,7 @@ const styles = StyleSheet.create({
   },
   image: {
     width: '100%',
-    height: '70%', 
+    height: '66%', 
     borderBottomRightRadius: 310,
     overflow: 'hidden',
     resizeMode: 'cover',
@@ -49,7 +49,7 @@ const styles = StyleSheet.create({
   buttonContainer: {
     width: '100%', 
     alignItems: 'center',
-    marginBottom: 50, 
+    marginBottom: 70, 
   },
   button: {
     width: 209,
