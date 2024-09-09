@@ -11,7 +11,7 @@ export default function InputFieldCom({
       style={{
         width: 300,
         height: 50,
-        backgroundColor: '#0005',
+        backgroundColor: '#FFD1C4',
         paddingHorizontal: 10,
         marginBottom: 20,
       }}
