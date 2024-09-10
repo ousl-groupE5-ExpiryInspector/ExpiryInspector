@@ -11,6 +11,7 @@ import InventoryScreen from './src/screens/Inventory';
 import InventoryExpired from './src/screens/Inventory_Expired';
 import InventoryOutOFStock from './src/screens/Inventory_OutOfStock';
 import ItemList from './src/screens/ItemList';
+import ItemDetail from './src/screens/ItemDetail';
 
 
 const stack = createNativeStackNavigator();
@@ -31,6 +32,8 @@ const App=()=> {
       <stack.Screen name={'InventoryOutOfStock'} component={InventoryOutOFStock} />
 
       <stack.Screen name={'ItemList'} component={ItemList} options={{ headerShown: false }}/>
+      <stack.Screen name={'ItemDetail'} component={ItemDetail} options={{ headerShown: false }}/>
+
 
     </stack.Navigator>
   </NavigationContainer>
