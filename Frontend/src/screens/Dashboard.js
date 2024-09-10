@@ -5,8 +5,11 @@ export default function Dashboard({navigation}) {
 
   const handleUser = () =>{
     navigation.navigate('UserProfile');
-
   };
+  const moveInventory = () =>{
+    navigation.navigate('InventoryAvailable');
+  };
+
   return (
     <View style={styles.container}>
       <Text style={styles.header}>Welcome to the Dashboard ss</Text>
@@ -14,6 +17,11 @@ export default function Dashboard({navigation}) {
       <TouchableOpacity onPress={handleUser}>
         <Text>
           User page
+        </Text>
+      </TouchableOpacity>
+      <TouchableOpacity onPress={moveInventory}>
+        <Text>
+          inventory
         </Text>
       </TouchableOpacity>
     </View>
