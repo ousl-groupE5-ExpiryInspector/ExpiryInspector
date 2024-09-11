@@ -51,7 +51,7 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   iconContainer: {
-    flex: 1, // Ensure equal width for each button
+    flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
     paddingVertical: 10,
