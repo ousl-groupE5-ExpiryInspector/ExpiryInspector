@@ -32,7 +32,7 @@ export default function Dashboard({navigation}) {
       </TouchableOpacity>
       <TouchableOpacity onPress={moveBudget}>
         <Text>
-          inventory
+          budget
         </Text>
       </TouchableOpacity>
     </View>
