@@ -237,9 +237,11 @@ const styles = StyleSheet.create({
   col3: { flex: 4, justifyContent: 'center' },
   col4: { flex: 1, justifyContent: 'center' },
   col5: { flex: 1, justifyContent: 'flex-end' },
+
   listContainer: {
     paddingHorizontal: 10,
   },
+  
   ribbonContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',

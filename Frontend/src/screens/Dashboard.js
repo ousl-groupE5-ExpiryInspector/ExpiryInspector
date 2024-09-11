@@ -1,5 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import BackgroundFlex from '../components/BackgroundFlex';
+import NavBar from '../components/navigationBar';
 
 export default function Dashboard({navigation}) {
 
@@ -9,9 +11,13 @@ export default function Dashboard({navigation}) {
   const moveInventory = () =>{
     navigation.navigate('InventoryAvailable');
   };
+  const moveBudget = () =>{
+    navigation.navigate('Budget');
+  };
 
   return (
-    <View style={styles.container}>
+    <BackgroundFlex>
+      <View style={styles.container}>
       <Text style={styles.header}>Welcome to the Dashboard ss</Text>
 
       <TouchableOpacity onPress={handleUser}>
@@ -24,7 +30,18 @@ export default function Dashboard({navigation}) {
           inventory
         </Text>
       </TouchableOpacity>
+      <TouchableOpacity onPress={moveBudget}>
+        <Text>
+          inventory
+        </Text>
+      </TouchableOpacity>
     </View>
+    
+    <NavBar navigation={navigation} />
+
+
+    </BackgroundFlex>
+    
   );
 }
 

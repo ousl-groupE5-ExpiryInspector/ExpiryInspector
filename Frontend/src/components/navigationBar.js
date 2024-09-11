@@ -8,7 +8,7 @@ export default function NavBar({ navigation }) {
       <TouchableOpacity style={styles.navItem} onPress={() => navigation.navigate('Dashboard')}>
         <Image source={require('../../assets/BackArrow_icon.png')} style={styles.navIcon} />
       </TouchableOpacity>
-      <TouchableOpacity style={styles.navItem} onPress={() => navigation.navigate('Dashboard')}>
+      <TouchableOpacity style={styles.navItem} onPress={() => navigation.navigate('Budget')}>
         <Image source={require('../../assets/BackArrow_icon.png')} style={styles.navIcon} />
       </TouchableOpacity>
       <TouchableOpacity style={styles.navItem} onPress={() => navigation.navigate('Dashboard')}>
