@@ -134,7 +134,7 @@ export default function ItemDetail({ route, navigation }) {
 
         {/* Edit Button */}
         <TouchableOpacity onPress={handleEdit} style={styles.editButton}>
-          <Image source={require('../../assets/Add_icon.png')} style={styles.IconEdit} />
+          <Image source={require('../../assets/Edit_Icon.png')} style={styles.IconEdit} />
         </TouchableOpacity>
 
         {/* Modal for Updating Item */}
@@ -231,8 +231,8 @@ const styles = StyleSheet.create({
     right: 10,
   },
   IconEdit: {
-    width: 70, 
-    height: 70, 
+    width: 30, 
+    height: 30, 
     marginBottom: 5,
   },
   modalView: {

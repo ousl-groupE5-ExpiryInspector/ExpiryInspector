@@ -6,16 +6,16 @@ export default function NavBar({ navigation }) {
   return (
     <View style={styles.bottomNav}>
       <TouchableOpacity style={styles.navItem} onPress={() => navigation.navigate('Dashboard')}>
-        <Image source={require('../../assets/BackArrow_icon.png')} style={styles.navIcon} />
+        <Image source={require('../../assets/Home_Icon.png')} style={styles.navIcon} />
       </TouchableOpacity>
       <TouchableOpacity style={styles.navItem} onPress={() => navigation.navigate('Budget')}>
-        <Image source={require('../../assets/BackArrow_icon.png')} style={styles.navIcon} />
+        <Image source={require('../../assets/Budget_Icon.png')} style={styles.navIcon} />
       </TouchableOpacity>
       <TouchableOpacity style={styles.navItem} onPress={() => navigation.navigate('Dashboard')}>
-        <Image source={require('../../assets/BackArrow_icon.png')} style={styles.navIcon} />
+        <Image source={require('../../assets/Notification_Icon.png')} style={styles.navIcon} />
       </TouchableOpacity>
       <TouchableOpacity style={styles.navItem} onPress={() => navigation.navigate('InventoryAvailable')}>
-        <Image source={require('../../assets/BackArrow_icon.png')} style={styles.navIcon} />
+        <Image source={require('../../assets/Inventory_Icon.png')} style={styles.navIcon} />
       </TouchableOpacity>
     </View>
   );
