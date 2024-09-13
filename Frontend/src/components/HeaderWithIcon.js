@@ -1,10 +1,10 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
 
-export default function HeaderWithIcon({ title, MoveTo, navigation }) {
+export default function HeaderWithIcon({ title, MoveTo, navigation, db=false }) {
   return (
     <View style={styles.headerContainer}>
-      <TouchableOpacity onPress={() => navigation.navigate(MoveTo)}>
+      <TouchableOpacity onPress={() => navigation.navigate(MoveTo, db)}>
         <Image
           source={require('../../assets/BackArrow_icon.png')}
           style={styles.icon}

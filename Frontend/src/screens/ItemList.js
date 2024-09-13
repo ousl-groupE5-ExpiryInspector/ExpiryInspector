@@ -91,20 +91,14 @@ export default function ItemList({ route, navigation }) {
         <Text style={styles.col1}>{item.name}</Text>
         <Text style={styles.col2}>{item.qty}</Text>
         <Text style={styles.col3}>{item.expireDate}</Text>
-
+  
         <TouchableOpacity style={styles.col4} name="delete" color="red" onPress={() => deleteItem(item.id)}>
-          <Image  source={require('../../assets/Delete_icon.png')} 
-          style={{width:25, height:25}}
-           />
+          <Image source={require('../../assets/Delete_icon.png')} style={{ width: 25, height: 25 }} />
         </TouchableOpacity>
-
+  
         <View style={styles.col5}>
-          <Image 
-          style={{width:25, height:25}} 
-          source={require('../../assets/Next_icon.png')}/>
+          <Image style={{ width: 25, height: 25 }} source={require('../../assets/Next_icon.png')} />
         </View>
-        
-        
       </View>
     </TouchableOpacity>
   );
@@ -237,9 +231,11 @@ const styles = StyleSheet.create({
   col3: { flex: 4, justifyContent: 'center' },
   col4: { flex: 1, justifyContent: 'center' },
   col5: { flex: 1, justifyContent: 'flex-end' },
+
   listContainer: {
     paddingHorizontal: 10,
   },
+  
   ribbonContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
