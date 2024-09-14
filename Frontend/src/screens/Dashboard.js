@@ -14,6 +14,12 @@ export default function Dashboard({navigation}) {
   const moveBudget = () =>{
     navigation.navigate('Budget');
   };
+  const moveFAQ = () =>{
+    navigation.navigate('FAQ');
+  };
+  const moveCamara = () =>{
+    navigation.navigate('Camara');
+  };
 
   return (
     <BackgroundFlex>
@@ -34,6 +40,16 @@ export default function Dashboard({navigation}) {
         <Text>
           budget
         </Text>
+        <TouchableOpacity onPress={moveFAQ}>
+        <Text>
+          FAQ
+        </Text>
+      </TouchableOpacity>
+      <TouchableOpacity onPress={moveCamara}>
+        <Text>
+          Camara
+        </Text>
+      </TouchableOpacity>
       </TouchableOpacity>
     </View>
     

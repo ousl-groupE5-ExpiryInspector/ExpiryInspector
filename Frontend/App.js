@@ -13,7 +13,9 @@ import InventoryOutOFStock from './src/screens/Inventory_OutOfStock';
 import ItemList from './src/screens/ItemList';
 import ItemDetail from './src/screens/ItemDetail';
 import BudgetScreen from './src/screens/BudgetPlanner';
-
+import FAQScreen from './src/screens/FAQ';
+import NotificationScreen from './src/screens/Notification';
+import CamaraScreen from './src/screens/Camara';
 
 const stack = createNativeStackNavigator();
 const App=()=> {
@@ -36,6 +38,11 @@ const App=()=> {
       <stack.Screen name={'ItemDetail'} component={ItemDetail} options={{ headerShown: false }}/>
       <stack.Screen name={'Budget'} component={BudgetScreen} options={{ headerShown: false }}/>
 
+      <stack.Screen name={'FAQ'} component={FAQScreen} options={{ headerShown: true }}/>
+
+      <stack.Screen name={'Notification'} component={NotificationScreen} options={{ headerShown: true }}/>
+      
+      <stack.Screen name={'Camara'} component={CamaraScreen} options={{ headerShown: true }}/>
 
     </stack.Navigator>
   </NavigationContainer>
