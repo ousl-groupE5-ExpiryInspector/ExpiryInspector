@@ -38,7 +38,7 @@ const App=()=> {
       <stack.Screen name={'ItemDetail'} component={ItemDetail} options={{ headerShown: false }}/>
       <stack.Screen name={'Budget'} component={BudgetScreen} options={{ headerShown: false }}/>
 
-      <stack.Screen name={'FAQ'} component={FAQScreen} options={{ headerShown: true }}/>
+      <stack.Screen name={'FAQ'} component={FAQScreen} options={{ headerShown: false }}/>
 
       <stack.Screen name={'Notification'} component={NotificationScreen} options={{ headerShown: true }}/>
       
