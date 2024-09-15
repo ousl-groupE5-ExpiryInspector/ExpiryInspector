@@ -31,8 +31,8 @@ const App=()=> {
       <stack.Screen  name={'Dashboard'} component={Dashboard}/>
 
       <stack.Screen name={'InventoryAvailable'} component={InventoryScreen} options={{ headerShown: false }}/>
-      <stack.Screen name={'InventoryExpired'} component={InventoryExpired} />
-      <stack.Screen name={'InventoryOutOfStock'} component={InventoryOutOFStock} />
+      <stack.Screen name={'InventoryExpired'} component={InventoryExpired} options={{ headerShown: false }}/>
+      <stack.Screen name={'InventoryOutOfStock'} component={InventoryOutOFStock} options={{ headerShown: false }} />
 
       <stack.Screen name={'ItemList'} component={ItemList} options={{ headerShown: false }}/>
       <stack.Screen name={'ItemDetail'} component={ItemDetail} options={{ headerShown: false }}/>
