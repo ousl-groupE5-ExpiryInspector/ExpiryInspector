@@ -71,7 +71,6 @@ export default function FAQScreen({ navigation }) {
           question=" 6.   How do I receive notifications?" 
           answer="Notifications are automatically sent based on the expiry dates of the items you have added to your inventory." 
         />
-        
         <FAQItem 
           question=" 7.   How to add an item to the budget list?" 
           answer="To add an item to the budget list, navigate to the 'Budget List' section in the app and click on 'Add Item'. Fill in the required details and save the item." 
@@ -88,7 +87,6 @@ export default function FAQScreen({ navigation }) {
           question=" 10.  How to edit an item in the inventory?" 
           answer="To edit an item in the inventory, navigate to the 'Inventory' section, find the item you want to edit, and click on the 'Edit' button. Make the necessary changes and save the item." 
         /> 
-       
       </ScrollView>
       <NavBar navigation={navigation} />
     </BackgroundFlex>
