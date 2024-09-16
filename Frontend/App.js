@@ -24,7 +24,7 @@ const App=()=> {
       <stack.Screen  name={'Welcome'} component={LandingPage} options={{ headerShown: false }}/>
       <stack.Screen  name={'SignUp'} component={SignInScreen} options={{ headerShown: false }}/>
       <stack.Screen  name={'Login'} component={LoginScreen} options={{ headerShown: false }}/>
-      <stack.Screen  name={'FogotPassword'} component={FogotPasswordSC}/>
+      <stack.Screen  name={'FogotPassword'} component={FogotPasswordSC} options={{ headerShown: false }}/>
       <stack.Screen  name={'UserProfile'} component={UserAccount}/>
       <stack.Screen  name={'Dashboard'} component={Dashboard}/>
 
