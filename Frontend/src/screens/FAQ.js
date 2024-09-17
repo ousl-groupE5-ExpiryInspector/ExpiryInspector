@@ -28,18 +28,15 @@ const FAQItem = ({ question, answer }) => {
 export default function FAQScreen({ navigation }) {
   return (
     <BackgroundFlex>
-      <View style={styles.headerContainer}>
-        <HeaderWithIcon title="FAQ" MoveTo='Dashboard' navigation={navigation} />
         <View style={styles.buttonsContainer}>
+        <HeaderWithIcon title="FAQ" MoveTo='Dashboard' navigation={navigation} />
           <TouchableOpacity style={styles.registerButton} onPress={() => navigation.navigate('SignUp')}>
             <Text style={styles.buttonText}>Register</Text>
           </TouchableOpacity>
           <TouchableOpacity style={styles.loginButton} onPress={() => navigation.navigate('Login')}>
             <Text style={styles.buttonText}>Log In</Text>
           </TouchableOpacity>
-        </View>
       </View>
-
       <View style={styles.name}>
         <Title2>Expiry </Title2>
         <Title2>Inspector</Title2>
@@ -94,10 +91,6 @@ export default function FAQScreen({ navigation }) {
 }
 
 const styles = StyleSheet.create({
-
-  scrollContainer: {
-    padding: 20,
-  },
   name: {
     alignItems: 'flex-start',
     justifyContent: 'flex-start',
@@ -108,31 +101,27 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     paddingLeft: 20,  
   },
+  scrollContainer: {
+    padding: 10,
+  },
   faqItem: {
     marginBottom: 20,
   },
-  headerContainer: {
-    flexDirection: 'row',
-    justifyContent:'space-between',
-    alignItems: 'center',
-    paddingTop: 20, 
-    paddingHorizontal: 120,
-    paddingBottom: 20,
-  },
   buttonsContainer: {
     flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 100, 
   },
   registerButton: {
     backgroundColor: '#000000',
-    paddingVertical: 10,
-    paddingHorizontal: 20,
+    padding:12,
     borderRadius: 15,
     marginLeft: 10,
   },
   loginButton: {
     backgroundColor: '#2BD110',
-    paddingVertical: 10,
-    paddingHorizontal: 20,
+    padding:12,
     borderRadius: 15,
     marginLeft: 10,
   },
@@ -156,6 +145,7 @@ const styles = StyleSheet.create({
     padding: 10,
     borderRadius: 5,
     marginTop: 5,
+    marginLeft: 12,
   },
   answer: {
     fontSize: 16,
