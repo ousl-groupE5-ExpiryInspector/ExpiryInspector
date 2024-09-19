@@ -29,7 +29,10 @@ export default function FAQScreen({ navigation }) {
   return (
     <BackgroundFlex>
         <View style={styles.buttonsContainer}>
-        <HeaderWithIcon title="FAQ" MoveTo='Dashboard' navigation={navigation} />
+          <View>
+          <HeaderWithIcon title="FAQ" MoveTo='Dashboard' navigation={navigation} />
+          </View>
+        
           <TouchableOpacity style={styles.registerButton} onPress={() => navigation.navigate('SignUp')}>
             <Text style={styles.buttonText}>Register</Text>
           </TouchableOpacity>
@@ -109,21 +112,24 @@ const styles = StyleSheet.create({
   },
   buttonsContainer: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: 100, 
+    justifyContent: 'flex-start',
+    alignItems: 'center'
   },
   registerButton: {
     backgroundColor: '#000000',
-    padding:12,
+    width: 90, height: 40, 
+    alignItems: 'center',
+    justifyContent: 'center',
     borderRadius: 15,
-    marginLeft: 10,
+    marginLeft:60,
   },
   loginButton: {
     backgroundColor: '#2BD110',
-    padding:12,
+    width: 90, height: 40, 
+    alignItems: 'center',
+    justifyContent: 'center',
     borderRadius: 15,
-    marginLeft: 10,
+    margin:10,
   },
   buttonText: {
     color: '#FFFFFF',
@@ -145,7 +151,7 @@ const styles = StyleSheet.create({
     padding: 10,
     borderRadius: 5,
     marginTop: 5,
-    marginLeft: 12,
+    marginLeft: 30,
   },
   answer: {
     fontSize: 16,
