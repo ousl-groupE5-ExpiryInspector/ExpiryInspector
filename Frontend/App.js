@@ -27,7 +27,7 @@ const App=()=> {
       <stack.Screen  name={'SignUp'} component={SignInScreen} options={{ headerShown: false }}/>
       <stack.Screen  name={'Login'} component={LoginScreen} options={{ headerShown: false }}/>
       <stack.Screen  name={'FogotPassword'} component={FogotPasswordSC} options={{ headerShown: false }}/>
-      <stack.Screen  name={'UserProfile'} component={UserAccount}/>
+      <stack.Screen  name={'UserProfile'} component={UserAccount} options={{ headerShown: false }}/>
       <stack.Screen  name={'Dashboard'} component={Dashboard}/>
 
       <stack.Screen name={'InventoryAvailable'} component={InventoryScreen} options={{ headerShown: false }}/>
