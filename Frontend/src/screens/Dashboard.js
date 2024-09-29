@@ -1,14 +1,29 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import BackgroundFlex from '../components/BackgroundFlex';
+import NavBar from '../components/navigationBar';
 
 export default function Dashboard({navigation}) {
 
   const handleUser = () =>{
     navigation.navigate('UserProfile');
-
   };
+  const moveInventory = () =>{
+    navigation.navigate('InventoryAvailable');
+  };
+  const moveBudget = () =>{
+    navigation.navigate('Budget');
+  };
+  const moveFAQ = () =>{
+    navigation.navigate('FAQ');
+  };
+  const moveCamara = () =>{
+    navigation.navigate('Camara');
+  };
+
   return (
-    <View style={styles.container}>
+    <BackgroundFlex>
+      <View style={styles.container}>
       <Text style={styles.header}>Welcome to the Dashboard ss</Text>
 
       <TouchableOpacity onPress={handleUser}>
@@ -16,7 +31,33 @@ export default function Dashboard({navigation}) {
           User page
         </Text>
       </TouchableOpacity>
+      <TouchableOpacity onPress={moveInventory}>
+        <Text>
+          inventory
+        </Text>
+      </TouchableOpacity>
+      <TouchableOpacity onPress={moveBudget}>
+        <Text>
+          budget
+        </Text>
+        <TouchableOpacity onPress={moveFAQ}>
+        <Text>
+          FAQ
+        </Text>
+      </TouchableOpacity>
+      <TouchableOpacity onPress={moveCamara}>
+        <Text>
+          Camara
+        </Text>
+      </TouchableOpacity>
+      </TouchableOpacity>
     </View>
+    
+    <NavBar navigation={navigation} />
+
+
+    </BackgroundFlex>
+    
   );
 }
 

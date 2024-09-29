@@ -1,12 +1,12 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
 
-const HeaderWithIcon = ({ title, onIconPress, iconSource }) => {
+export default function HeaderWithIcon({ title, MoveTo, navigation, db=false }) {
   return (
     <View style={styles.headerContainer}>
-      <TouchableOpacity onPress={onIconPress}>
+      <TouchableOpacity onPress={() => navigation.navigate(MoveTo, db)}>
         <Image
-          source={iconSource}
+          source={require('../../assets/BackArrow_icon.png')}
           style={styles.icon}
         />
       </TouchableOpacity>
@@ -20,20 +20,19 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     width: '100%',
-    marginBottom: 15,
+    margin: 10,
     paddingHorizontal: 10,
   },
   icon: {
-    width: 28,
-    height: 28,
+    width: 35,
+    height: 35,
     marginRight: 10,
   },
   headerText: {
-    fontSize: 28,
-    color:'white',
+    fontFamily: 'inter',
+    fontSize: 32,
+    color: 'white',
     fontWeight: 'bold',
     textAlign: 'left',
   },
 });
-
-export default HeaderWithIcon;

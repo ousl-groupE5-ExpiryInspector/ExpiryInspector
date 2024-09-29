@@ -1,30 +1,39 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, TouchableOpacity, Text, StyleSheet } from 'react-native';
+import { useNavigationState } from '@react-navigation/native';
 
 export default function TopBarButtons({ onExpiredPress, onAvailablePress, onOutOfStockPress }) {
   const [activePage, setActivePage] = useState('AVAILABLE');
 
-  const handlePress = (page, onPress) => {
-    setActivePage(page);
-    if (onPress) onPress();
-  };
+  // Get the current route name from navigation state
+  const currentRouteName = useNavigationState(state => state.routes[state.index].name);
+
+  useEffect(() => {
+    if (currentRouteName === 'InventoryExpired') {
+      setActivePage('EXPIRED');
+    } else if (currentRouteName === 'InventoryAvailable') {
+      setActivePage('AVAILABLE');
+    } else if (currentRouteName === 'InventoryOutOfStock') {
+      setActivePage('OUT_OF_STOCK');
+    }
+  }, [currentRouteName]);
 
   return (
     <View style={styles.topBar}>
       <TopBarButton 
         label="EXPIRED" 
         isActive={activePage === 'EXPIRED'} 
-        onPress={() => handlePress('EXPIRED', onExpiredPress)} 
+        onPress={onExpiredPress} 
       />
       <TopBarButton 
         label="AVAILABLE" 
         isActive={activePage === 'AVAILABLE'} 
-        onPress={() => handlePress('AVAILABLE', onAvailablePress)} 
+        onPress={onAvailablePress} 
       />
       <TopBarButton 
         label="OUT OF STOCK" 
         isActive={activePage === 'OUT_OF_STOCK'} 
-        onPress={() => handlePress('OUT_OF_STOCK', onOutOfStockPress)} 
+        onPress={onOutOfStockPress} 
       />
     </View>
   );
@@ -47,10 +56,11 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     width: '100%',
     backgroundColor: '#D9D9D9',
+    height: 50,
     marginBottom: 20,
   },
   iconContainer: {
-    flex: 1, // Ensure equal width for each button
+    flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
     paddingVertical: 10,
@@ -66,6 +76,6 @@ const styles = StyleSheet.create({
   activeText: {
     fontSize: 16,
     fontWeight: 'bold',
-    color: '#fff',
+    color: '#000',
   },
 });

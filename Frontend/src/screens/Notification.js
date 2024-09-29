@@ -2,11 +2,12 @@ import React from 'react';
 import { View, Text } from 'react-native';
 import BackgroundFlex from '../components/BackgroundFlex';
 
-export default function UserAccount({ navigation }) {
+export default function NotificationScreen({ navigation }) {
   return (
     <BackgroundFlex>
       <View>
-      <Text>User Account page</Text>
+      <Text>Notification page</Text>
+      
       </View>
 
     </BackgroundFlex>

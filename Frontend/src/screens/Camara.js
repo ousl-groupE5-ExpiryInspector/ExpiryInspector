@@ -2,11 +2,12 @@ import React from 'react';
 import { View, Text } from 'react-native';
 import BackgroundFlex from '../components/BackgroundFlex';
 
-export default function UserAccount({ navigation }) {
+export default function CamaraScreen({ navigation }) {
   return (
     <BackgroundFlex>
       <View>
-      <Text>User Account page</Text>
+      <Text>Camara page</Text>
+      
       </View>
 
     </BackgroundFlex>

@@ -77,8 +77,10 @@
    ForText:{
      color: 'black',
      marginBottom:30,
+     marginRight:20,
      alignSelf:'flex-end',
      fontWeight:'bold',
+     
    },
  });
  
