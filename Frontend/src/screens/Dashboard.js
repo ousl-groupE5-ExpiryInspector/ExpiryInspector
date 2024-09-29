@@ -86,15 +86,16 @@ const styles = StyleSheet.create({
     borderRadius: 5,
   },
   WelcomeContainer: {
-    padding: 0,
     width: '100%',
     height: 200,
+    marginBottom: 20,
     alignItems: 'center',
 
   },
   box: {
     width: 400,
     height: 200,
+    paddingHorizontal: 20,
     marginBottom: 20,
     borderRadius: 5,
     overflow: 'hidden',
