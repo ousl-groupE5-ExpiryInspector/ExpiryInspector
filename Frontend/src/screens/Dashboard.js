@@ -1,17 +1,15 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ImageBackground } from 'react-native';
 import BackgroundFlex from '../components/BackgroundFlex';
 import NavBar from '../components/navigationBar';
+import HomeTopBar from '../components/HomeTopBar';
 
-export default function Dashboard({navigation}) {
+export default function Dashboard({ navigation }) {
 
-  const handleUser = () =>{
-    navigation.navigate('UserProfile');
-  };
-  const moveInventory = () =>{
+  const moveInventory = () => {
     navigation.navigate('InventoryAvailable');
   };
-  const moveBudget = () =>{
+  const moveBudget = () => {
     navigation.navigate('Budget');
   };
   const moveFAQ = () =>{
@@ -22,42 +20,44 @@ export default function Dashboard({navigation}) {
   };
 
   return (
+    <>
     <BackgroundFlex>
-      <View style={styles.container}>
-      <Text style={styles.header}>Welcome to the Dashboard ss</Text>
+      <HomeTopBar MoveTo='UserProfile'
+        navigation={navigation} />
+      <View style={styles.WelcomeContainer}>
+        <ImageBackground
+          source={require('../../assets/welcomeImage.png')}
+          style={styles.imageBackground}
+          resizeMode='cover'>
+          <Text style={styles.HeaderText}>Welcome to the Dashboard</Text>
+        </ImageBackground>
+      </View>
+      
+        <View style={styles.container}>
+          {/* Inventory Box */}
+          <TouchableOpacity onPress={moveInventory} style={styles.box}>
+            <ImageBackground
+              source={require('../../assets/inventory.png')}
+              style={styles.imageBackground}
+              resizeMode='cover'>
+              <Text style={styles.boxText}>Inventory</Text>
+            </ImageBackground>
+          </TouchableOpacity>
 
-      <TouchableOpacity onPress={handleUser}>
-        <Text>
-          User page
-        </Text>
-      </TouchableOpacity>
-      <TouchableOpacity onPress={moveInventory}>
-        <Text>
-          inventory
-        </Text>
-      </TouchableOpacity>
-      <TouchableOpacity onPress={moveBudget}>
-        <Text>
-          budget
-        </Text>
-        <TouchableOpacity onPress={moveFAQ}>
-        <Text>
-          FAQ
-        </Text>
-      </TouchableOpacity>
-      <TouchableOpacity onPress={moveCamara}>
-        <Text>
-          Camara
-        </Text>
-      </TouchableOpacity>
-      </TouchableOpacity>
-    </View>
-    
-    <NavBar navigation={navigation} />
+          {/* Budget Box */}
+          <TouchableOpacity onPress={moveBudget} style={styles.box}>
+            <ImageBackground
+              source={require('../../assets/budget.png')}
+              style={styles.imageBackground}
+              resizeMode='cover'>
+              <Text style={styles.boxText}>Budget</Text>
+            </ImageBackground>
+          </TouchableOpacity>
+        </View>
 
-
-    </BackgroundFlex>
-    
+        <NavBar navigation={navigation} />
+      </BackgroundFlex>
+    </>
   );
 }
 
@@ -70,5 +70,40 @@ const styles = StyleSheet.create({
   header: {
     fontSize: 24,
     fontWeight: 'bold',
+  },
+  imageBackground: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    width: '100%',
+  },
+  boxText: {
+    fontSize: 28,
+    fontWeight: 'bold',
+    color: '#fff',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    padding: 10,
+    borderRadius: 5,
+  },
+  WelcomeContainer: {
+    padding: 0,
+    width: '100%',
+    height: 200,
+    alignItems: 'center',
+
+  },
+  box: {
+    width: 400,
+    height: 200,
+    marginBottom: 20,
+    borderRadius: 5,
+    overflow: 'hidden',
+  },
+  HeaderText: {
+    fontSize: 28,
+    fontWeight: '900',
+    color: '#000',
+    backgroundColor: 'rgba(255, 255, 255, 0.7)',
+    padding: 10,
   },
 });

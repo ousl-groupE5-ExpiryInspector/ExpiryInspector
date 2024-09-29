@@ -26,9 +26,11 @@ const App=()=> {
       <stack.Screen  name={'Welcome'} component={LandingPage} options={{ headerShown: false }}/>
       <stack.Screen  name={'SignUp'} component={SignInScreen} options={{ headerShown: false }}/>
       <stack.Screen  name={'Login'} component={LoginScreen} options={{ headerShown: false }}/>
+
       <stack.Screen  name={'FogotPassword'} component={FogotPasswordSC} options={{ headerShown: false }}/>
       <stack.Screen  name={'UserProfile'} component={UserAccount} options={{ headerShown: false }}/>
-      <stack.Screen  name={'Dashboard'} component={Dashboard}/>
+      <stack.Screen  name={'Dashboard'} component={Dashboard} options={{ headerShown: false }}/>
+
 
       <stack.Screen name={'InventoryAvailable'} component={InventoryScreen} options={{ headerShown: false }}/>
       <stack.Screen name={'InventoryExpired'} component={InventoryExpired} options={{ headerShown: false }}/>
