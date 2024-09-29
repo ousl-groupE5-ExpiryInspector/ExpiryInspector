@@ -12,9 +12,16 @@ export default function Dashboard({ navigation }) {
   const moveBudget = () => {
     navigation.navigate('Budget');
   };
+  const moveFAQ = () =>{
+    navigation.navigate('FAQ');
+  };
+  const moveCamara = () =>{
+    navigation.navigate('Camara');
+  };
 
   return (
     <>
+    <BackgroundFlex>
       <HomeTopBar MoveTo='UserProfile'
         navigation={navigation} />
       <View style={styles.WelcomeContainer}>
@@ -25,7 +32,7 @@ export default function Dashboard({ navigation }) {
           <Text style={styles.HeaderText}>Welcome to the Dashboard</Text>
         </ImageBackground>
       </View>
-      <BackgroundFlex>
+      
         <View style={styles.container}>
           {/* Inventory Box */}
           <TouchableOpacity onPress={moveInventory} style={styles.box}>

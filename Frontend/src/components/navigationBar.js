@@ -11,7 +11,7 @@ export default function NavBar({ navigation }) {
       <TouchableOpacity style={styles.navItem} onPress={() => navigation.navigate('Budget')}>
         <Image source={require('../../assets/Budget_Icon.png')} style={styles.navIcon} />
       </TouchableOpacity>
-      <TouchableOpacity style={styles.navItem} onPress={() => navigation.navigate('Dashboard')}>
+      <TouchableOpacity style={styles.navItem} onPress={() => navigation.navigate('Notification')}>
         <Image source={require('../../assets/Notification_Icon.png')} style={styles.navIcon} />
       </TouchableOpacity>
       <TouchableOpacity style={styles.navItem} onPress={() => navigation.navigate('InventoryAvailable')}>
