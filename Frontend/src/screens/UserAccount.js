@@ -20,10 +20,10 @@ export default function UserAccount({ navigation }) {
         {/* Name and Email Dummy Data */}
         <View style={styles.infoContainer}>
           <Text style={styles.label}>Name:</Text>
-          <Text style={styles.infoText}>John Doe</Text>
+          <Text style={styles.infoText}>Sahani Weerasinghe</Text>
 
           <Text style={styles.label}>Email:</Text>
-          <Text style={styles.infoText}>john.doe@example.com</Text>
+          <Text style={styles.infoText}>sahani123@ousl.com</Text>
         </View>
 
         {/* Logout and Delete Account Buttons */}
