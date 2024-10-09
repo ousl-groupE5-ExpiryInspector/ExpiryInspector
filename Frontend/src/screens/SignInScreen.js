@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Text, TouchableOpacity, View, StyleSheet, Alert } from 'react-native';
 import auth from '@react-native-firebase/auth';
+import firestore from '@react-native-firebase/firestore';
 import InputFieldCom from '../components/inputField';
 import ButtonComponentAuth from '../components/ButtonComponentAuth';
 import ImageComponentAuth from '../components/ImageComponentAuth';
@@ -13,8 +14,7 @@ export default function SignUpScreen({ navigation }) {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
 
-  // Debugging: Log input values when the handleRegister is called
-  const handleRegister = () => {
+  const handleRegister = async () => {
     console.log("Name:", name);
     console.log("Email:", email);
     console.log("Password:", password);
@@ -32,22 +32,26 @@ export default function SignUpScreen({ navigation }) {
       return;
     }
 
-    // Firebase authentication for creating new user
-    auth()
-      .createUserWithEmailAndPassword(email, password)
-      .then(userCredentials => {
-        const user = userCredentials.user;
-        console.log('Registered with:', user.email);
-        // Optionally update the user's display name
-        return user.updateProfile({ displayName: name });
-      })
-      .then(() => {
-        Alert.alert('Success', 'User registered successfully.');
-        navigation.navigate('Dashboard');  // Navigate to the Dashboard screen after registration
-      })
-      .catch(error => {
-        Alert.alert('Registration Error', error.message);
+    try {
+      const userCredentials = await auth().createUserWithEmailAndPassword(email, password);
+      const user = userCredentials.user;
+      console.log('Registered with:', user.email);
+
+      // Store user data in Firestore
+      await firestore().collection('Users').doc(user.uid).set({
+        name: name,
+        email: email,
+        createdAt: firestore.FieldValue.serverTimestamp(),
       });
+
+      // Optionally update the user's display name
+      await user.updateProfile({ displayName: name });
+
+      Alert.alert('Success', 'User registered successfully.');
+      navigation.navigate('Login');
+    } catch (error) {
+      Alert.alert('Registration Error', error.message);
+    }
   };
 
   const navigateToLogin = () => {
@@ -63,25 +67,25 @@ export default function SignUpScreen({ navigation }) {
       <InputFieldCom
         placeholder="Name"
         value={name}
-        onChangeText={(text) => setName(text)}  // Ensure state is updated correctly
+        onChangeText={(text) => setName(text)}
       />
       <InputFieldCom
         placeholder="Email"
         keyboardType="email-address"
         value={email}
-        onChangeText={(text) => setEmail(text)}  // Ensure state is updated correctly
+        onChangeText={(text) => setEmail(text)} 
       />
       <InputFieldCom
         placeholder="Password"
         secureTextEntry={true}
         value={password}
-        onChangeText={(text) => setPassword(text)}  // Ensure state is updated correctly
+        onChangeText={(text) => setPassword(text)} 
       />
       <InputFieldCom
         placeholder="Confirm Password"
         secureTextEntry={true}
         value={confirmPassword}
-        onChangeText={(text) => setConfirmPassword(text)}  // Ensure state is updated correctly
+        onChangeText={(text) => setConfirmPassword(text)} 
       />
 
       <ButtonComponentAuth title="Register" onPress={handleRegister} />
