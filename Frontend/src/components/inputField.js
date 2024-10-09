@@ -2,9 +2,11 @@ import { View, TextInput } from 'react-native';
 import React from 'react';
 
 export default function InputFieldCom({
+  value,               
+  onChangeText,        
   placeholder,
   keyboardType = 'default',
-  secureTextEntry = false
+  secureTextEntry = false,
 }) {
   return (
     <View
@@ -24,6 +26,9 @@ export default function InputFieldCom({
           height: '100%',
           color: '#fff',
         }}
+        value={value}               // Bind value prop to TextInput
+        onChangeText={onChangeText} 
+        placeholderTextColor="#fff" 
       />
     </View>
   );
