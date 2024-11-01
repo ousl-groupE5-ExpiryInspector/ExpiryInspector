@@ -1,16 +1,16 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Image, Alert } from 'react-native';
 import NavBar from '../components/navigationBar';
 import BackgroundFlex from '../components/BackgroundFlex';
 import { launchCamera } from 'react-native-image-picker';
-import TextRecognition from 'react-native-text-recognition';
+import TextRecognition from '@react-native-ml-kit/text-recognition';
 
 export default function CameraScreen({ navigation }) {
   const [image, setImage] = useState(null);
-  const [text, setText] = useState(null);
+  const [text, setText] = useState('');
 
   const handleCapture = () => {
-    launchCamera({ mediaType: 'photo' }, (response) => {
+    launchCamera({ mediaType: 'photo' }, async (response) => {
       if (response.didCancel) {
         console.warn("Camera closed without capturing an image.");
       } else if (response.errorCode) {
@@ -18,29 +18,27 @@ export default function CameraScreen({ navigation }) {
         Alert.alert("Camera Error", "Could not open camera. Please try again.");
       } else if (response.assets && response.assets.length > 0) {
         const uri = response.assets[0].uri;
-        console.log("Image captured:", uri);
         setImage(uri);
-      }
-    });
-  };
+        console.log("Image captured:", uri); // Log image URI
 
-  useEffect(() => {
-    const recognizeText = async () => {
-      if (image) {
         try {
-          console.log("Starting text recognition on:", image);
-          const result = await TextRecognition.recognize(image);
-          console.log("Recognition result:", result);
-          setText(result);
+          const recognizedText = await TextRecognition.recognize(uri);
+          console.log("Recognized Text:", recognizedText); // Log recognized text
+
+          // Extract the text from the recognized result
+          if (recognizedText && recognizedText.text) {
+            setText(recognizedText.text); // Set the recognized text
+          } else {
+            setText(''); // If no text found, set text to empty string
+            console.warn("No text recognized in the image."); // Log no text found
+          }
         } catch (error) {
           console.error("Text recognition failed:", error);
           Alert.alert("Text Recognition Error", "Failed to recognize text. Please try again.");
         }
       }
-    };
-
-    recognizeText();
-  }, [image]);
+    });
+  };
 
   return (
     <BackgroundFlex>
@@ -53,8 +51,12 @@ export default function CameraScreen({ navigation }) {
           )}
         </View>
         <View>
-          <Text>Text Read</Text>
-          {text ? <Text>{text.join(' ')}</Text> : <Text>No text recognized</Text>}
+          <Text style={styles.textLabel}>Text Read:</Text>
+          {text ? (
+            <Text>{text}</Text> // Display the recognized text
+          ) : (
+            <Text>No text recognized</Text>
+          )}
         </View>
         <TouchableOpacity style={styles.captureButton} onPress={handleCapture}>
           <Text style={styles.buttonText}>Capture</Text>
@@ -88,6 +90,11 @@ const styles = StyleSheet.create({
     color: 'white',
     fontSize: 16,
     textAlign: 'center',
+  },
+  textLabel: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginVertical: 10,
   },
   captureButton: {
     backgroundColor: 'orange',
