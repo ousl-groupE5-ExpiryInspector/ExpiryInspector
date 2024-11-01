@@ -33,6 +33,10 @@ export default function LoginScreen({ navigation }) {
         Alert.alert('Login Error', error.message);
       });
   };
+  const handleCamera = () => {
+    // Redirect to camera screen
+    navigation.navigate('Camara');
+  };
 
   const navigateToSignUp = () => {
     // Redirect to Sign Up screen
@@ -70,6 +74,7 @@ export default function LoginScreen({ navigation }) {
       </TouchableOpacity>
 
       <ButtonComponentAuth title="Login" onPress={handleLogin} />
+      <ButtonComponentAuth title="cam" onPress={handleCamera} />
 
       <View style={styles.rowContainer}>
         <Text style={styles.footerText}>Don't have an account? </Text>

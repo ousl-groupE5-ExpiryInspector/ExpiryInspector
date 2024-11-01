@@ -7,6 +7,11 @@ import { launchImageLibrary } from 'react-native-image-picker';
 import Title3 from '../components/Title3';
 
 export default function ItemDetail({ route, navigation }) {
+  const handleCamera = () => {
+    // Redirect to camera screen
+    navigation.navigate('Camara');
+  };
+
   const item = route.params?.item || {
     name: '',
     qty: 0,
@@ -79,6 +84,7 @@ export default function ItemDetail({ route, navigation }) {
         <TouchableOpacity style={styles.deleteIcon} onPress={handleDeleteItem}>
           <Image source={require('../../assets/Delete_icon.png')} style={styles.iconImage} />
         </TouchableOpacity>
+        
 
         <View style={{alignItems:'center'}}>
 
@@ -125,6 +131,9 @@ export default function ItemDetail({ route, navigation }) {
                 <View style={styles.dateBox}>
                   <Text>{updatedItem.qty}</Text>
                 </View>
+                <TouchableOpacity style={styles.deleteIcon} onPress={handleCamera}>
+          <Image source={require('../../assets/Delete_icon.png')} style={styles.iconImage} />
+        </TouchableOpacity>
                 
               </View>
             
@@ -133,6 +142,7 @@ export default function ItemDetail({ route, navigation }) {
         
 
         {/* Edit Button */}
+        
         <TouchableOpacity onPress={handleEdit} style={styles.editButton}>
           <Image source={require('../../assets/Edit_Icon.png')} style={styles.IconEdit} />
         </TouchableOpacity>

@@ -29,10 +29,14 @@ npm install react-native-screens react-native-safe-area-context
 
 npm install @react-navigation/native-stack
 
----------------Navigation [already installed]-------------
+---------------Firebase Authentication-------------
 
 npm install @react-native-firebase/app @react-native-firebase/auth
 
+---------------Firestore-------------
+npm install @react-native-firebase/firestore
+
+npm install @react-native-firebase/app
 
 
 -- Writen by Pradeep--
