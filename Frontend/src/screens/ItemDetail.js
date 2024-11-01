@@ -132,8 +132,8 @@ export default function ItemDetail({ route, navigation }) {
                   <Text>{updatedItem.qty}</Text>
                 </View>
                 <TouchableOpacity style={styles.deleteIcon} onPress={handleCamera}>
-          <Image source={require('../../assets/Delete_icon.png')} style={styles.iconImage} />
-        </TouchableOpacity>
+                <Image source={require('../../assets/Delete_icon.png')} style={styles.iconImage} />
+                </TouchableOpacity>
                 
               </View>
             
