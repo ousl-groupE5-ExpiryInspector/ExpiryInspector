@@ -38,5 +38,11 @@ npm install @react-native-firebase/firestore
 
 npm install @react-native-firebase/app
 
+-----------------text read------------------
+npm install react-native-image-picker
+
+
+npm install @react-native-ml-kit/text-recognition react-native-image-picker
+
 
 -- Writen by Pradeep--
