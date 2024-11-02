@@ -11,67 +11,83 @@ export default function CameraScreen({ navigation }) {
 
   const handleCapture = () => {
     launchCamera({ mediaType: 'photo' }, async (response) => {
-        if (response.didCancel) {
-            console.warn("Camera closed without capturing an image.");
-        } else if (response.errorCode) {
-            console.error("Camera error:", response.errorMessage);
-            Alert.alert("Camera Error", "Could not open camera. Please try again.");
-        } else if (response.assets && response.assets.length > 0) {
-            const uri = response.assets[0].uri;
-            setImage(uri);
-            console.log("Image captured:", uri);
+      if (response.didCancel) {
+        console.warn("Camera closed without capturing an image.");
+      } else if (response.errorCode) {
+        console.error("Camera error:", response.errorMessage);
+        Alert.alert("Camera Error", "Could not open camera. Please try again.");
+      } else if (response.assets && response.assets.length > 0) {
+        const uri = response.assets[0].uri;
+        setImage(uri);
+        console.log("Image captured:", uri);
 
-            try {
-                const recognizedText = await TextRecognition.recognize(uri);
-                console.log("Recognized Text:", recognizedText.text); // Log the full recognized text
+        try {
+          const recognizedText = await TextRecognition.recognize(uri);
+          console.log("Recognized Text:", recognizedText.text); // Log the full recognized text
 
-                if (recognizedText && recognizedText.text) {
-                    const text = recognizedText.text;
-                    setText(text);
+          if (recognizedText && recognizedText.text) {
+            const text = recognizedText.text;
+            setText(text);
 
-                    // Filter out expiration dates, manufacture dates, and prices
-                    const expirationDates = extractExpirationDates(text);
-                    const manufactureDates = extractManufactureDates(text);
-                    const prices = extractPrices(text);
+            // Filter out expiration dates, manufacture dates, and prices
+            const expirationDates = extractExpirationDates(text);
+            const manufactureDates = extractManufactureDates(text);
+            const prices = extractPrices(text);
 
-                    console.log("Expiration Dates:", expirationDates);
-                    console.log("Manufacture Dates:", manufactureDates);
-                    console.log("Prices (in RS):", prices);
-                } else {
-                    setText(''); 
-                    console.warn("No text recognized in the image.");
-                }
-            } catch (error) {
-                console.error("Text recognition failed:", error);
-                Alert.alert("Text Recognition Error", "Failed to recognize text. Please try again.");
-            }
+            console.log("Expiration Dates:", expirationDates);
+            console.log("Manufacture Dates:", manufactureDates);
+            console.log("Prices (in RS):", prices);
+          } else {
+            setText('');
+            console.warn("No text recognized in the image.");
+          }
+        } catch (error) {
+          console.error("Text recognition failed:", error);
+          Alert.alert("Text Recognition Error", "Failed to recognize text. Please try again.");
         }
+      }
     });
-};
+  };
 
-// Function to extract expiration dates
-const extractExpirationDates = (text) => {
-  const expirationDateRegex = /(?:exp|EXP)\s*:? ?\s*(\d{4}[-./]\d{1,2}[-./]\d{1,2})/gi;
+  // Function to extract expiration dates in dd-mm-yyyy format
+  const extractExpirationDates = (text) => {
+    const expirationDateRegex = /(?:exp|EXP)\s*:? ?\s*(\d{1,2}[-./]\d{1,2}[-./]\d{2,4}|\d{4}[-./]\d{1,2}[-./]\d{1,2})/gi;
 
     const matches = text.match(expirationDateRegex);
-    return matches ? matches.map(match => match.split(":")[1].trim()) : []; // Return the date part
-};
+    return matches ? matches.map(match => formatDate(match)) : []; // Return formatted date
+  };
 
-// Function to extract manufacture dates
-const extractManufactureDates = (text) => {
-    const manufactureDateRegex = /mfg\s*:\s*(\d{4}\/\d{1,2}\/\d{1,2})/gi; // Matches "mfg : YYYY/MM/DD"
+  // Function to extract manufacture dates in dd-mm-yyyy format
+  const extractManufactureDates = (text) => {
+    const manufactureDateRegex = /(?:mfg|MFG|mgd|MFD|mfd|Manufacture|MANUFACTURE)\s*:? ?\s*(\d{1,2}[-./]\d{1,2}[-./]\d{2,4}|\d{4}[-./]\d{1,2}[-./]\d{1,2})/gi;
     const matches = text.match(manufactureDateRegex);
-    return matches ? matches.map(match => match.split(":")[1].trim()) : []; // Return the date part
-};
+    return matches ? matches.map(match => formatDate(match)) : []; // Return formatted date
+  };
 
-// Function to extract prices in RS
-const extractPrices = (text) => {
-    const priceRegex = /(?:Rs|RS|₹)\s*\d+(?:\.\d{1,2})?/g; // Matches prices prefixed with "Rs", "RS", or "₹"
-    return text.match(priceRegex) || [];
-};
+  // Function to extract prices in RS and convert them to numeric values
+  const extractPrices = (text) => {
+    const priceRegex = /(?:Rs|RS|₹)\s*[:=]?\s*([\d,.]+)/g;
+    const matches = text.match(priceRegex);
+    return matches ? matches.map(price => parseFloat(price.replace(/[^0-9.]/g, '').replace(/,/g, ''))) : [];
+  };
 
+  // Helper function to format dates into dd-mm-yyyy
+  const formatDate = (dateString) => {
+    const dateParts = dateString.match(/(\d{1,2})[-./](\d{1,2})[-./](\d{2,4})/);
+    if (dateParts) {
+      let day = dateParts[1];
+      let month = dateParts[2];
+      let year = dateParts[3];
 
+      // Handle two-digit year
+      if (year.length === 2) {
+        year = '20' + year; // Assuming dates are in the 21st century
+      }
 
+      return `${day.padStart(2, '0')}-${month.padStart(2, '0')}-${year}`; // Format to dd-mm-yyyy
+    }
+    return null;
+  };
 
   return (
     <BackgroundFlex>
