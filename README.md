@@ -29,5 +29,23 @@ npm install react-native-screens react-native-safe-area-context
 
 npm install @react-navigation/native-stack
 
+---------------Firebase Authentication-------------
+
+npm install @react-native-firebase/app @react-native-firebase/auth
+
+---------------Firestore-------------
+npm install @react-native-firebase/firestore
+
+npm install @react-native-firebase/app
+
+-----------------text read------------------
+npm install react-native-image-picker
+
+
+npm install @react-native-ml-kit/text-recognition react-native-image-picker
+
+ 
+---------------------other--------------------------
+npx react-native doctor
 
 -- Writen by Pradeep--

@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
-import { Text, TouchableOpacity, View, StyleSheet } from 'react-native';
+import { Text, TouchableOpacity, View, StyleSheet, Alert } from 'react-native';
+import auth from '@react-native-firebase/auth';
+import firestore from '@react-native-firebase/firestore';
 import InputFieldCom from '../components/inputField';
 import ButtonComponentAuth from '../components/ButtonComponentAuth';
 import ImageComponentAuth from '../components/ImageComponentAuth';
 import HeaderTextComponent from '../components/HeaderTextComponent';
 import BackgroundFlex from '../components/BackgroundFlex';
-
 
 export default function SignUpScreen({ navigation }) {
   const [name, setName] = useState('');
@@ -13,10 +14,46 @@ export default function SignUpScreen({ navigation }) {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
 
-  const handleRegister = () => {
-    navigation.navigate('Dashboard');
+  const handleRegister = async () => {
+    console.log("Name:", name);
+    console.log("Email:", email);
+    console.log("Password:", password);
+    console.log("Confirm Password:", confirmPassword);
+
+    // Validate if all fields are filled
+    if (!name || !email || !password || !confirmPassword) {
+      Alert.alert('Error', 'All fields are required.');
+      return;
+    }
+
+    // Check if passwords match
+    if (password !== confirmPassword) {
+      Alert.alert('Error', 'Passwords do not match.');
+      return;
+    }
+
+    try {
+      const userCredentials = await auth().createUserWithEmailAndPassword(email, password);
+      const user = userCredentials.user;
+      console.log('Registered with:', user.email);
+
+      // Store user data in Firestore
+      await firestore().collection('Users').doc(user.uid).set({
+        name: name,
+        email: email,
+        createdAt: firestore.FieldValue.serverTimestamp(),
+      });
+
+      // Optionally update the user's display name
+      await user.updateProfile({ displayName: name });
+
+      Alert.alert('Success', 'User registered successfully.');
+      navigation.navigate('Login');
+    } catch (error) {
+      Alert.alert('Registration Error', error.message);
+    }
   };
-  
+
   const navigateToLogin = () => {
     navigation.navigate('Login');
   };
@@ -24,31 +61,31 @@ export default function SignUpScreen({ navigation }) {
   return (
     <BackgroundFlex>
       <HeaderTextComponent title="Register Here" />
-      
+
       <ImageComponentAuth source={require('../../assets/cover_signup.png')} />
 
-      <InputFieldCom 
-        placeholder="Name" 
-        value={name} 
-        onChangeText={setName} 
+      <InputFieldCom
+        placeholder="Name"
+        value={name}
+        onChangeText={(text) => setName(text)}
       />
-      <InputFieldCom 
-        placeholder="Email" 
-        keyboardType="email-address" 
-        value={email} 
-        onChangeText={setEmail} 
+      <InputFieldCom
+        placeholder="Email"
+        keyboardType="email-address"
+        value={email}
+        onChangeText={(text) => setEmail(text)} 
       />
-      <InputFieldCom 
-        placeholder="Password" 
-        secureTextEntry={true} 
-        value={password} 
-        onChangeText={setPassword} 
+      <InputFieldCom
+        placeholder="Password"
+        secureTextEntry={true}
+        value={password}
+        onChangeText={(text) => setPassword(text)} 
       />
-      <InputFieldCom 
-        placeholder="Confirm Password" 
-        secureTextEntry={true} 
-        value={confirmPassword} 
-        onChangeText={setConfirmPassword} 
+      <InputFieldCom
+        placeholder="Confirm Password"
+        secureTextEntry={true}
+        value={confirmPassword}
+        onChangeText={(text) => setConfirmPassword(text)} 
       />
 
       <ButtonComponentAuth title="Register" onPress={handleRegister} />
@@ -68,13 +105,13 @@ export default function SignUpScreen({ navigation }) {
 const styles = StyleSheet.create({
   rowContainer: {
     flexDirection: 'row',
-    alignItems: 'center', 
-    marginTop: 10, 
-    marginBottom: 30, 
+    alignItems: 'center',
+    marginTop: 10,
+    marginBottom: 30,
   },
   footerText: {
     color: 'black',
-    fontSize: 16, 
+    fontSize: 16,
   },
   loginText: {
     color: 'white',

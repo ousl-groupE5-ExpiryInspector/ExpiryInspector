@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+// item details page
+import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Alert, Modal, TextInput, Image, ScrollView } from 'react-native';
 import BackgroundFlex from '../components/BackgroundFlex';
 import HeaderWithIcon from '../components/HeaderWithIcon';
@@ -7,6 +8,11 @@ import { launchImageLibrary } from 'react-native-image-picker';
 import Title3 from '../components/Title3';
 
 export default function ItemDetail({ route, navigation }) {
+  const handleCamera = () => {
+    // Redirect to camera screen
+    navigation.navigate('Camara');
+  };
+
   const item = route.params?.item || {
     name: '',
     qty: 0,
@@ -14,20 +20,43 @@ export default function ItemDetail({ route, navigation }) {
     manufactureDate: '',
     description: '',
     image: null,
+    price:0,
   };
 
   const [updatedItem, setUpdatedItem] = useState({
     name: item.name,
     category: item.category,
-    qty: item.qty.toString(),
+    qty: item.qty,
     expireDate: item.expireDate,
     manufactureDate: item.manufactureDate || '',
     description: item.description || '',
     image: item.image || null,
+    price:item.price,
   });
+  useEffect(() => {
+    if (route.params?.item) {
+      const { expireDate, manufactureDate, price } = route.params.item;
+      setUpdatedItem(prevState => ({
+        ...prevState,
+        expireDate,
+        manufactureDate,
+        price,
+      }));
+    }
+  }, [route.params?.item]);
 
   const [showModal, setShowModal] = useState(false);
   const [modalItem, setModalItem] = useState({ ...updatedItem });
+  const [totalValue, setTotalValue] = useState(0);
+
+      useEffect(() => {
+        // Recalculate total value when quantity or price changes
+        const newTotalValue = updatedItem.qty * updatedItem.price;
+        setTotalValue(newTotalValue);
+      }, [updatedItem.qty, updatedItem.price]);
+  
+      
+      
 
   const pickImage = () => {
     launchImageLibrary({ mediaType: 'photo', quality: 1 }, response => {
@@ -79,6 +108,7 @@ export default function ItemDetail({ route, navigation }) {
         <TouchableOpacity style={styles.deleteIcon} onPress={handleDeleteItem}>
           <Image source={require('../../assets/Delete_icon.png')} style={styles.iconImage} />
         </TouchableOpacity>
+        
 
         <View style={{alignItems:'center'}}>
 
@@ -90,11 +120,16 @@ export default function ItemDetail({ route, navigation }) {
               <Image source={require('../../assets/PlaceHolder_Item.jpg')} style={styles.placeholderImage} />
             )}
           </TouchableOpacity>
+          <TouchableOpacity style={styles.deleteIcon} onPress={handleCamera}>
+                <Image source={require('../../assets/camera_icon2.png')} style={styles.iconImage} />
+                </TouchableOpacity>
 
           {/* Item Details */}
           <View style={{alignItems:'center'}}>
             <Text style={{color:'white', fontWeight:'semibold', fontSize: 30}}>{updatedItem.name}</Text>
+            
           </View>
+          
 
           <View style={styles.descriptionBox}>
             <Title3>Description:</Title3>
@@ -120,10 +155,26 @@ export default function ItemDetail({ route, navigation }) {
                 
               </View>
             </View>
-            <View style={{ alignItems:'center'}}>
-                <Title3>Quantity</Title3>
+            <View style={styles.dateflex}>
+              <View>
+                <Title3>Quantity </Title3>
+                
                 <View style={styles.dateBox}>
                   <Text>{updatedItem.qty}</Text>
+                </View>
+              </View>
+              <View>
+                <Title3>  Price</Title3>
+                <View style={styles.dateBox}>
+                  <Text>{updatedItem.price}</Text>
+                </View>
+                
+              </View>
+            </View>
+            <View style={{ alignItems:'center'}}>
+                <Title3>Total</Title3>
+                <View style={styles.dateBox}>
+                  <Text>{totalValue.toFixed(2)}</Text>
                 </View>
                 
               </View>
@@ -133,6 +184,7 @@ export default function ItemDetail({ route, navigation }) {
         
 
         {/* Edit Button */}
+        
         <TouchableOpacity onPress={handleEdit} style={styles.editButton}>
           <Image source={require('../../assets/Edit_Icon.png')} style={styles.IconEdit} />
         </TouchableOpacity>
@@ -173,9 +225,21 @@ export default function ItemDetail({ route, navigation }) {
               value={modalItem.qty}
               onChangeText={text => setModalItem({ ...modalItem, qty: text })}
             />
+            <TextInput
+              style={styles.input}
+              placeholder="Price"
+              keyboardType="numeric"
+              value={modalItem.price}
+              onChangeText={text => setModalItem({ ...modalItem, price: text })}
+            />
             <TouchableOpacity style={styles.modalButton} onPress={updateItem}>
               <Text style={styles.buttonText}>Save Changes</Text>
             </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.modalButton} onPress={() => {updateItem();handleCamera();}}>
+                <Text style={styles.buttonText}>Open camera</Text>
+                </TouchableOpacity>
+
             <TouchableOpacity style={styles.modalButton} onPress={() => setShowModal(false)}>
               <Text style={styles.buttonText}>Cancel</Text>
             </TouchableOpacity>
@@ -197,7 +261,7 @@ const styles = StyleSheet.create({
   descriptionBox: {
     backgroundColor: '#FFD1C4',
     borderRadius: 5,
-    height: 150,
+    height: 130,
     width: '75%',
     marginTop: 5,
   },
@@ -205,7 +269,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-evenly',
     alignItems: 'center',
-    height: 120,
+    height: 80,
     width:'90%',
   },
   dateBox: {
