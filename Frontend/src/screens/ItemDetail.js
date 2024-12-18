@@ -121,7 +121,7 @@ export default function ItemDetail({ route, navigation }) {
             )}
           </TouchableOpacity>
           <TouchableOpacity style={styles.deleteIcon} onPress={handleCamera}>
-                <Image source={require('../../assets/camera_icon.png')} style={styles.iconImage} />
+                <Image source={require('../../assets/camera_icon2.png')} style={styles.iconImage} />
                 </TouchableOpacity>
 
           {/* Item Details */}
