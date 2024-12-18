@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Image, Alert } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, Image, Alert, ScrollView } from 'react-native';
 import NavBar from '../components/navigationBar';
 import BackgroundFlex from '../components/BackgroundFlex';
 import { launchCamera } from 'react-native-image-picker';
@@ -7,7 +7,12 @@ import TextRecognition from '@react-native-ml-kit/text-recognition';
 
 export default function CameraScreen({ navigation }) {
   const [image, setImage] = useState(null);
-  const [text, setText] = useState('');
+  const [capturedData, setCapturedData] = useState({
+    text: '',
+    expirationDates: [],
+    manufactureDates: [],
+    prices: [],
+  });
 
   const handleCapture = () => {
     launchCamera({ mediaType: 'photo' }, async (response) => {
@@ -19,33 +24,48 @@ export default function CameraScreen({ navigation }) {
       } else if (response.assets && response.assets.length > 0) {
         const uri = response.assets[0].uri;
         setImage(uri);
-        console.log("Image captured:", uri);
 
         try {
           const recognizedText = await TextRecognition.recognize(uri);
-          console.log("Recognized Text:", recognizedText.text); // Log the full recognized text
 
           if (recognizedText && recognizedText.text) {
             const text = recognizedText.text;
-            setText(text);
-
-            // Filter out expiration dates, manufacture dates, and prices
             const expirationDates = extractExpirationDates(text);
             const manufactureDates = extractManufactureDates(text);
             const prices = extractPrices(text);
 
-            console.log("Expiration Dates:", expirationDates);
-            console.log("Manufacture Dates:", manufactureDates);
-            console.log("Prices (in RS):", prices);
+            setCapturedData({
+              text,
+              expirationDates,
+              manufactureDates,
+              prices,
+            });
           } else {
-            setText('');
-            console.warn("No text recognized in the image.");
+            setCapturedData({
+              text: '',
+              expirationDates: [],
+              manufactureDates: [],
+              prices: [],
+            });
           }
         } catch (error) {
           console.error("Text recognition failed:", error);
           Alert.alert("Text Recognition Error", "Failed to recognize text. Please try again.");
         }
       }
+    });
+  };
+
+  const handleSave = () => {
+    const { expirationDates, manufactureDates, prices } = capturedData;
+
+    // Pass data to the ItemDetail screen
+    navigation.navigate('ItemDetail', {
+      item: {
+        expireDate: expirationDates[0] || '',
+        manufactureDate: manufactureDates[0] || '',
+        price: prices[0] || '',
+      },
     });
   };
 
@@ -99,17 +119,18 @@ export default function CameraScreen({ navigation }) {
             <Text style={styles.placeholderText}>No Image Captured</Text>
           )}
         </View>
-        <View>
-          <Text style={styles.textLabel}>Text Read:</Text>
-          {text ? (
-            <Text>{text}</Text> // Display the recognized text
-          ) : (
-            <Text>No text recognized</Text>
-          )}
-        </View>
-        <TouchableOpacity style={styles.captureButton} onPress={handleCapture}>
-          <Text style={styles.buttonText}>Capture</Text>
-        </TouchableOpacity>
+        <Text style={styles.textLabel}>Recognized Text:</Text>
+
+        <ScrollView>
+          <Text style={{width:300, textAlign: 'center'}}>{capturedData.text || 'No text recognized'}</Text>
+          <TouchableOpacity style={styles.captureButton} onPress={handleCapture}>
+            <Text style={styles.buttonText}>Capture</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
+            <Text style={styles.buttonText}>Save</Text>
+          </TouchableOpacity>
+        </ScrollView>
+        
       </View>
       <NavBar navigation={navigation} />
     </BackgroundFlex>
@@ -141,7 +162,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   textLabel: {
-    fontSize: 18,
+    fontSize: 22,
     fontWeight: 'bold',
     marginVertical: 10,
   },
@@ -150,6 +171,7 @@ const styles = StyleSheet.create({
     padding: 10,
     borderRadius: 5,
     elevation: 3,
+    margin: 10,
     shadowColor: '#000',
     shadowOffset: {
       width: 0,
@@ -162,5 +184,12 @@ const styles = StyleSheet.create({
     color: 'white',
     fontSize: 18,
     textAlign: 'center',
+  },
+  saveButton: {
+    backgroundColor: 'green',
+    padding: 10,
+    borderRadius: 5,
+    margin: 10,
+    elevation: 3,
   },
 });

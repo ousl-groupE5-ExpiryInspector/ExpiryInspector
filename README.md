@@ -44,5 +44,8 @@ npm install react-native-image-picker
 
 npm install @react-native-ml-kit/text-recognition react-native-image-picker
 
+ 
+---------------------other--------------------------
+npx react-native doctor
 
 -- Writen by Pradeep--

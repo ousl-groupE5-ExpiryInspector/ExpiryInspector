@@ -1,3 +1,4 @@
+// item details page
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Alert, Modal, TextInput, Image, ScrollView } from 'react-native';
 import BackgroundFlex from '../components/BackgroundFlex';
