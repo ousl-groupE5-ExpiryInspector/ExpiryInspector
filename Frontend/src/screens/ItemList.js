@@ -32,12 +32,12 @@ export default function ItemList({ route, navigation }) {
   // Sample items data
   useEffect(() => {
     const allItems = [
-      { id: 1, category: 'Dairy', name: 'Milk', qty: 10, expireDate: '2024-09-20', value: 30 },
-      { id: 2, category: 'Dairy', name: 'Cheese', qty: 5, expireDate: '2024-09-30', value: 50 },
-      { id: 3, category: 'Spices', name: 'Turmeric', qty: 8, expireDate: '2025-01-01', value: 20 },
-      { id: 4, category: 'Spices', name: 'Cumin', qty: 12, expireDate: '2025-03-15', value: 40 },
-      { id: 5, category: 'Glossary', name: 'Flour', qty: 20, expireDate: '2025-05-10', value: 25 },
-      { id: 6, category: 'Glossary', name: 'Sugar', qty: 15, expireDate: '2024-12-25', value: 60 },
+      { id: 1, category: 'Dairy', name: 'Milk', qty: 10, expireDate: '2024-09-20', price: 30 },
+      { id: 2, category: 'Dairy', name: 'Cheese', qty: 5, expireDate: '2024-09-30', price: 50 },
+      { id: 3, category: 'Spices', name: 'Turmeric', qty: 8, expireDate: '2025-01-01', price: 20 },
+      { id: 4, category: 'Spices', name: 'Cumin', qty: 12, expireDate: '2025-03-15', price: 40 },
+      { id: 5, category: 'Glossary', name: 'Flour', qty: 20, expireDate: '2025-05-10', price: 25 },
+      { id: 6, category: 'Glossary', name: 'Sugar', qty: 15, expireDate: '2024-12-25', price: 60 },
     ];
 
     const filteredItems = allItems.filter(item => item.category === category);
@@ -47,7 +47,7 @@ export default function ItemList({ route, navigation }) {
     let total = 0;
     let expiringSoon = 0;
     filteredItems.forEach(item => {
-      total += item.qty * item.value;
+      total += item.qty * item.price;
       if (new Date(item.expireDate) < new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)) { // next 30 days
         expiringSoon++;
       }
@@ -71,7 +71,7 @@ export default function ItemList({ route, navigation }) {
   // Add a new item to the list
   const addItem = () => {
     if (newItem.name && newItem.qty && newItem.expireDate && newItem.price) {
-      const newItemWithCategory = { ...newItem, id: items.length + 1, category, value: parseFloat(newItem.price) };
+      const newItemWithCategory = { ...newItem, id: items.length + 1, category, price: parseFloat(newItem.price) };
       setItems([...items, newItemWithCategory]);
 
       // Update total value with the new item's total price

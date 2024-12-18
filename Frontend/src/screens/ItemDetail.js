@@ -20,7 +20,7 @@ export default function ItemDetail({ route, navigation }) {
     manufactureDate: '',
     description: '',
     image: null,
-    price:0.00,
+    price:0,
   };
 
   const [updatedItem, setUpdatedItem] = useState({
@@ -121,13 +121,15 @@ export default function ItemDetail({ route, navigation }) {
             )}
           </TouchableOpacity>
           <TouchableOpacity style={styles.deleteIcon} onPress={handleCamera}>
-                <Image source={require('../../assets/Delete_icon.png')} style={styles.iconImage} />
+                <Image source={require('../../assets/camera_icon.png')} style={styles.iconImage} />
                 </TouchableOpacity>
 
           {/* Item Details */}
           <View style={{alignItems:'center'}}>
             <Text style={{color:'white', fontWeight:'semibold', fontSize: 30}}>{updatedItem.name}</Text>
+            
           </View>
+          
 
           <View style={styles.descriptionBox}>
             <Title3>Description:</Title3>
@@ -233,6 +235,11 @@ export default function ItemDetail({ route, navigation }) {
             <TouchableOpacity style={styles.modalButton} onPress={updateItem}>
               <Text style={styles.buttonText}>Save Changes</Text>
             </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.modalButton} onPress={() => {updateItem();handleCamera();}}>
+                <Text style={styles.buttonText}>Open camera</Text>
+                </TouchableOpacity>
+
             <TouchableOpacity style={styles.modalButton} onPress={() => setShowModal(false)}>
               <Text style={styles.buttonText}>Cancel</Text>
             </TouchableOpacity>
