@@ -1,3 +1,4 @@
+// Camera.js
 import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Image, Alert, ScrollView } from 'react-native';
 import NavBar from '../components/navigationBar';
@@ -59,7 +60,7 @@ export default function CameraScreen({ navigation }) {
   const handleSave = () => {
     const { expirationDates, manufactureDates, prices } = capturedData;
 
-    // Pass data to the ItemDetail screen
+    // Pass the captured data to the ItemDetail screen
     navigation.navigate('ItemDetail', {
       item: {
         expireDate: expirationDates[0] || '',
@@ -69,42 +70,33 @@ export default function CameraScreen({ navigation }) {
     });
   };
 
-  // Function to extract expiration dates in dd-mm-yyyy format
+  // Functions to extract data
   const extractExpirationDates = (text) => {
     const expirationDateRegex = /(?:exp|EXP)\s*:? ?\s*(\d{1,2}[-./]\d{1,2}[-./]\d{2,4}|\d{4}[-./]\d{1,2}[-./]\d{1,2})/gi;
-
     const matches = text.match(expirationDateRegex);
-    return matches ? matches.map(match => formatDate(match)) : []; // Return formatted date
+    return matches ? matches.map(match => formatDate(match)) : [];
   };
 
-  // Function to extract manufacture dates in dd-mm-yyyy format
   const extractManufactureDates = (text) => {
     const manufactureDateRegex = /(?:mfg|MFG|mgd|MFD|mfd|Manufacture|MANUFACTURE)\s*:? ?\s*(\d{1,2}[-./]\d{1,2}[-./]\d{2,4}|\d{4}[-./]\d{1,2}[-./]\d{1,2})/gi;
     const matches = text.match(manufactureDateRegex);
-    return matches ? matches.map(match => formatDate(match)) : []; // Return formatted date
+    return matches ? matches.map(match => formatDate(match)) : [];
   };
 
-  // Function to extract prices in RS and convert them to numeric values
   const extractPrices = (text) => {
     const priceRegex = /(?:Rs|RS|₹)\s*[:=]?\s*([\d,.]+)/g;
     const matches = text.match(priceRegex);
     return matches ? matches.map(price => parseFloat(price.replace(/[^0-9.]/g, '').replace(/,/g, ''))) : [];
   };
 
-  // Helper function to format dates into dd-mm-yyyy
   const formatDate = (dateString) => {
     const dateParts = dateString.match(/(\d{1,2})[-./](\d{1,2})[-./](\d{2,4})/);
     if (dateParts) {
       let day = dateParts[1];
       let month = dateParts[2];
       let year = dateParts[3];
-
-      // Handle two-digit year
-      if (year.length === 2) {
-        year = '20' + year; // Assuming dates are in the 21st century
-      }
-
-      return `${day.padStart(2, '0')}-${month.padStart(2, '0')}-${year}`; // Format to dd-mm-yyyy
+      if (year.length === 2) year = '20' + year;
+      return `${day.padStart(2, '0')}-${month.padStart(2, '0')}-${year}`;
     }
     return null;
   };
@@ -130,7 +122,6 @@ export default function CameraScreen({ navigation }) {
             <Text style={styles.buttonText}>Save</Text>
           </TouchableOpacity>
         </ScrollView>
-        
       </View>
       <NavBar navigation={navigation} />
     </BackgroundFlex>

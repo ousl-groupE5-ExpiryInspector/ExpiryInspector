@@ -1,5 +1,5 @@
 // item details page
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Alert, Modal, TextInput, Image, ScrollView } from 'react-native';
 import BackgroundFlex from '../components/BackgroundFlex';
 import HeaderWithIcon from '../components/HeaderWithIcon';
@@ -20,17 +20,30 @@ export default function ItemDetail({ route, navigation }) {
     manufactureDate: '',
     description: '',
     image: null,
+    price:0.00,
   };
 
   const [updatedItem, setUpdatedItem] = useState({
     name: item.name,
     category: item.category,
-    qty: item.qty.toString(),
+    qty: item.qty,
     expireDate: item.expireDate,
     manufactureDate: item.manufactureDate || '',
     description: item.description || '',
     image: item.image || null,
+    price:item.price,
   });
+  useEffect(() => {
+    if (route.params?.item) {
+      const { expireDate, manufactureDate, price } = route.params.item;
+      setUpdatedItem(prevState => ({
+        ...prevState,
+        expireDate,
+        manufactureDate,
+        price,
+      }));
+    }
+  }, [route.params?.item]);
 
   const [showModal, setShowModal] = useState(false);
   const [modalItem, setModalItem] = useState({ ...updatedItem });
@@ -127,8 +140,12 @@ export default function ItemDetail({ route, navigation }) {
                 
               </View>
             </View>
-            <View style={{ alignItems:'center'}}>
+            <View style={styles.dateflex}>
                 <Title3>Quantity</Title3>
+                <View style={styles.dateBox}>
+                  <Text>{updatedItem.qty}</Text>
+                </View>
+                <Title3>Price</Title3>
                 <View style={styles.dateBox}>
                   <Text>{updatedItem.qty}</Text>
                 </View>
