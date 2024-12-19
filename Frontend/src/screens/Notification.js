@@ -38,10 +38,10 @@ export default function NotificationScreen(navigation) {
     );
 
     // Check for notifications on component mount
-    checkForNotifications();
+    refreshNotifications();
   }, [items]);
 
-  const checkForNotifications = () => {
+  const refreshNotifications = () => {
     const newNotifications = [];
     const currentDate = new Date();
 
@@ -112,7 +112,11 @@ export default function NotificationScreen(navigation) {
           keyExtractor={(item) => item.id}
           renderItem={renderNotification}
         />
-        <Button title="Refresh" onPress={checkForNotifications} style={styles.button}/>
+        <TouchableOpacity onPress={refreshNotifications}>
+          <Text>
+          Refresh
+          </Text>
+          </TouchableOpacity>
         <NavBar navigation={navigation} />
       </View>
     </BackgroundFlex>
