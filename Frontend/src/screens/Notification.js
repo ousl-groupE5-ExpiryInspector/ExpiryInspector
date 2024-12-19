@@ -1,17 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import {
-  View,
-  Text,
-  FlatList,
-  Button,
-  StyleSheet,
-  TouchableOpacity,
-  Alert,
-} from 'react-native';
+import {View,Text,FlatList,Button,StyleSheet,TouchableOpacity,Alert,} from 'react-native';
 import BackgroundFlex from '../components/BackgroundFlex';
 import PushNotification from 'react-native-push-notification';
+import NavBar from '../components/navigationBar';
 
-export default function NotificationScreen() {
+export default function NotificationScreen(navigation) {
   // Sample data for items in the inventory
   const [items, setItems] = useState([
     { id: 1, category: 'Dairy', name: 'Milk', qty: 10, expireDate: '2024-12-20', price: 30 },
@@ -112,25 +105,21 @@ export default function NotificationScreen() {
 
   return (
     <BackgroundFlex>
-      <View style={styles.container}>
+      <View>
         <Text style={styles.header}>Notifications</Text>
         <FlatList
           data={notifications}
           keyExtractor={(item) => item.id}
           renderItem={renderNotification}
         />
-        <Button title="Check Notifications" onPress={checkForNotifications} />
+        <Button title="Refresh" onPress={checkForNotifications} style={styles.button}/>
+        <NavBar navigation={navigation} />
       </View>
     </BackgroundFlex>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    padding: 20,
-    backgroundColor: '#f9f9f9',
-  },
   header: {
     fontSize: 24,
     fontWeight: 'bold',
