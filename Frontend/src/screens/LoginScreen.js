@@ -33,10 +33,10 @@ export default function LoginScreen({ navigation }) {
         Alert.alert('Login Error', error.message);
       });
   };
-  const handleCamera = () => {
+  {/* const handleCamera = () => {
     // Redirect to camera screen
     navigation.navigate('Camara');
-  };
+  }; */}
 
   const navigateToSignUp = () => {
     // Redirect to Sign Up screen
