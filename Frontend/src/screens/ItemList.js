@@ -70,7 +70,7 @@ export default function ItemList({ route, navigation }) {
 
   // Add a new item to the list
   const addItem = () => {
-    if (newItem.name && newItem.qty && newItem.expireDate && newItem.price) {
+    if (newItem.name) {
       const newItemWithCategory = { ...newItem, id: items.length + 1, category, price: parseFloat(newItem.price) };
       setItems([...items, newItemWithCategory]);
 
@@ -81,7 +81,7 @@ export default function ItemList({ route, navigation }) {
       setNewItem({ name: '', qty: '', expireDate: '', price: '' }); // Reset the form
       setShowModal(false); // Close the modal
     } else {
-      Alert.alert('Error', 'Please fill in all fields');
+      Alert.alert('Error', 'Please fill the name field');
     }
   };
 
