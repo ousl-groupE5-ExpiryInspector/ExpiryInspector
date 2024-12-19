@@ -52,7 +52,63 @@ export default function NotificationScreen() {
     const newNotifications = [];
     const currentDate = new Date();
 
+    items.forEach((item) => {
+      // Check for out-of-stock items
+      if (item.qty === 0) {
+        newNotifications.push({
+          id: `${item.id}-stock`,
+          title: 'Stock Alert',
+          message: `${item.name} is out of stock.`,
+        });
 
+        // Trigger a push notification
+        PushNotification.localNotification({
+          channelId: 'item-alerts',
+          title: 'Stock Alert',
+          message: `${item.name} is out of stock.`,
+        });
+      }
+
+      // Check for items close to expiration (within 7 days)
+      const expireDate = new Date(item.expireDate);
+      const timeDifference = expireDate - currentDate;
+      const daysToExpire = timeDifference / (1000 * 60 * 60 * 24);
+
+      if (daysToExpire > 0 && daysToExpire <= 7) {
+        newNotifications.push({
+          id: `${item.id}-expire`,
+          title: 'Expiration Alert',
+          message: `${item.name} expires in ${Math.ceil(daysToExpire)} days!`,
+        });
+
+        // Trigger a push notification
+        PushNotification.localNotification({
+          channelId: 'item-alerts',
+          title: 'Expiration Alert',
+          message: `${item.name} expires in ${Math.ceil(daysToExpire)} days!`,
+        });
+      }
+    });
+
+    setNotifications(newNotifications);
+  };
+
+  // Delete a notification
+  const deleteNotification = (id) => {
+    setNotifications((prev) => prev.filter((notif) => notif.id !== id));
+    Alert.alert('Notification deleted');
+  };
+
+  // Render each notification item
+  const renderNotification = ({ item }) => (
+    <TouchableOpacity
+      style={styles.notificationItem}
+      onLongPress={() => deleteNotification(item.id)}
+    >
+      <Text style={styles.title}>{item.title}</Text>
+      <Text style={styles.message}>{item.message}</Text>
+    </TouchableOpacity>
+  );
 
   return (
     <BackgroundFlex>
