@@ -31,6 +31,8 @@ npm install @react-navigation/native-stack
 
 ---------------Firebase Authentication-------------
 
+npm install firebase
+
 npm install @react-native-firebase/app @react-native-firebase/auth
 
 ---------------Firestore-------------
