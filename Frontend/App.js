@@ -22,7 +22,7 @@ const App=()=> {
   return (
   <>
   <NavigationContainer>
-    <stack.Navigator initialRouteName="Dashboard">
+    <stack.Navigator initialRouteName="Welcome">
       <stack.Screen  name={'Welcome'} component={LandingPage} options={{ headerShown: false }}/>
       <stack.Screen  name={'SignUp'} component={SignInScreen} options={{ headerShown: false }}/>
       <stack.Screen  name={'Login'} component={LoginScreen} options={{ headerShown: false }}/>
