@@ -3,13 +3,16 @@ import {View,Text,FlatList,Button,StyleSheet,TouchableOpacity,Alert,} from 'reac
 import BackgroundFlex from '../components/BackgroundFlex';
 import PushNotification from 'react-native-push-notification';
 import NavBar from '../components/navigationBar';
+import HeaderWithIcon from '../components/HeaderWithIcon';
 
 export default function NotificationScreen(navigation) {
   // Sample data for items in the inventory
   const [items, setItems] = useState([
-    { id: 1, category: 'Dairy', name: 'Milk', qty: 10, expireDate: '2024-12-20', price: 30 },
-    { id: 2, category: 'Bakery', name: 'Bread', qty: 0, expireDate: '2024-12-02', price: 20 },
-    { id: 3, category: 'Spices', name: 'Salt', qty: 15, expireDate: '2025-01-15', price: 10 },
+    { id: 1, category: 'Dairy', name: 'Milk', qty: 10, expireDate: '2024-12-22', price: 300 },
+    { id: 2, category: 'Glossary', name: 'Bread', qty: 0, expireDate: '2024-12-02', price: 200 },
+    { id: 3, category: 'Spices', name: 'Salt', qty: 1, expireDate: '2024-12-26', price: 1000 },
+    { id: 2, category: 'Grains', name: 'Rice', qty: 0, expireDate: '2024-12-30', price: 225 },
+    { id: 3, category: 'Sanitary', name: 'Soap', qty: 3, expireDate: '2024-12-24', price: 10 },
   ]);
 
   // Notifications generated from inventory data
@@ -106,7 +109,7 @@ export default function NotificationScreen(navigation) {
   return (
     <BackgroundFlex>
       <View>
-        <Text style={styles.header}>Notifications</Text>
+        <HeaderWithIcon title="Notifications" MoveTo='Dashboard' navigation={navigation} />
         <FlatList
           data={notifications}
           keyExtractor={(item) => item.id}
