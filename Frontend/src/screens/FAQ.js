@@ -30,7 +30,7 @@ export default function FAQScreen({ navigation }) {
     <BackgroundFlex>
         <View style={styles.buttonsContainer}>
           <View>
-          <HeaderWithIcon title="FAQ" MoveTo='Dashboard' navigation={navigation} />
+          <HeaderWithIcon title="FAQ" MoveTo='Welcome' navigation={navigation} />
           </View>
         
           <TouchableOpacity style={styles.registerButton} onPress={() => navigation.navigate('SignUp')}>
