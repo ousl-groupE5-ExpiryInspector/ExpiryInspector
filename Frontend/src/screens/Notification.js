@@ -3,6 +3,7 @@ import {View,Text,FlatList,Button,StyleSheet,TouchableOpacity,Alert,} from 'reac
 import BackgroundFlex from '../components/BackgroundFlex';
 import PushNotification from 'react-native-push-notification';
 import NavBar from '../components/navigationBar';
+import HeaderWithIcon from '../components/HeaderWithIcon';
 
 export default function NotificationScreen(navigation) {
   // Sample data for items in the inventory
@@ -105,6 +106,7 @@ export default function NotificationScreen(navigation) {
 
   return (
     <BackgroundFlex>
+       <HeaderWithIcon title="Notification" MoveTo='Dashboard' navigation={navigation} />
       <View>
         <Text style={styles.header}>Notifications</Text>
         <FlatList
