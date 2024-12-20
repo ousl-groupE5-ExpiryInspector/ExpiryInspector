@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, StyleSheet, Alert } from 'react-native';
+import { View, StyleSheet, Alert,TouchableOpacity,Image } from 'react-native';
 import InputFieldCom from '../components/inputField';
 import ButtonComponentAuth from '../components/ButtonComponentAuth';
 import ImageComponentAuth from '../components/ImageComponentAuth';
@@ -29,9 +29,15 @@ export default function ForgotPasswordScreen({ navigation }) {
       Alert.alert('Error', 'Failed to send password reset email. Please try again.');
     }
   };
-
+  const handleFAQ = () => {
+    // Navigate to FAQ screen
+    navigation.navigate('FAQ');
+  }
   return (
     <BackgroundFlex>
+            <TouchableOpacity onPress={handleFAQ} style={styles.faqContainer}>
+              <Image source={require('../../assets/faqIcon.png')} style={styles.faq} />
+            </TouchableOpacity>
       <HeaderTextComponent title="Reset Password" />
 
       <View style={{ margin: 30 }}></View>
@@ -60,6 +66,22 @@ const styles = StyleSheet.create({
     marginTop: 10, 
     marginBottom: 30, 
   },
-   
-  
+  faq: {
+    width: 50,
+    height: 50,
+    resizeMode: 'contain',
+  }, 
+  faqContainer: {
+    position: 'absolute',
+    top: 10,
+    right: 10,
+    width: 55,
+    height: 55,
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 1,
+    backgroundColor: '#ccc',
+    borderRadius: 8,
+    padding: 5,
+  },
 });
