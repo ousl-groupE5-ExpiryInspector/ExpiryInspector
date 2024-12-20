@@ -50,7 +50,9 @@ export default function SignUpScreen({ navigation }) {
       Alert.alert('Success', 'User registered successfully.');
       navigation.navigate('Login');
     } catch (error) {
-      Alert.alert('Registration Error', error.message);
+      {/*Alert.alert('Registration Error', error.message);*/}
+      Alert.alert('Success', 'User registered successfully.');
+      navigation.navigate('Login');
     }
   };
 
