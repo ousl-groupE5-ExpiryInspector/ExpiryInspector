@@ -16,13 +16,14 @@ import BudgetScreen from './src/screens/BudgetPlanner';
 import FAQScreen from './src/screens/FAQ';
 import NotificationScreen from './src/screens/Notification';
 import CamaraScreen from './src/screens/Camara';
+import TutorialScreen from './src/screens/TutorialScreen';
 
 const stack = createNativeStackNavigator();
 const App=()=> {
   return (
   <>
   <NavigationContainer>
-    <stack.Navigator initialRouteName="Dashboard">
+    <stack.Navigator initialRouteName="Welcome">
       <stack.Screen  name={'Welcome'} component={LandingPage} options={{ headerShown: false }}/>
       <stack.Screen  name={'SignUp'} component={SignInScreen} options={{ headerShown: false }}/>
       <stack.Screen  name={'Login'} component={LoginScreen} options={{ headerShown: false }}/>
@@ -45,6 +46,7 @@ const App=()=> {
       <stack.Screen name={'Notification'} component={NotificationScreen} options={{ headerShown: true }}/>
       
       <stack.Screen name={'Camara'} component={CamaraScreen} options={{ headerShown: true }}/>
+      <stack.Screen name={'infoScreen'} component={TutorialScreen} options={{ headerShown: false }}/>
 
     </stack.Navigator>
   </NavigationContainer>
