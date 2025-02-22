@@ -8,11 +8,11 @@ import HeaderWithIcon from '../components/HeaderWithIcon';
 export default function NotificationScreen({ navigation }) {
   // Sample data for items in the inventory
   const [items, setItems] = useState([
-    { id: 1, category: 'Dairy', name: 'Milk', qty: 10, expireDate: '2024-12-22', price: 300 },
-    { id: 2, category: 'Glossary', name: 'Bread', qty: 0, expireDate: '2024-12-02', price: 200 },
-    { id: 3, category: 'Spices', name: 'Salt', qty: 1, expireDate: '2024-12-26', price: 1000 },
-    { id: 2, category: 'Grains', name: 'Rice', qty: 0, expireDate: '2024-12-30', price: 225 },
-    { id: 3, category: 'Sanitary', name: 'Soap', qty: 3, expireDate: '2024-12-24', price: 10 },
+    { id: 1, category: 'Dairy', name: 'Milk', qty: 10, expireDate: '2025-02-22', price: 300 },
+    { id: 2, category: 'Glossary', name: 'Bread', qty: 0, expireDate: '2025-03-02', price: 200 },
+    { id: 3, category: 'Spices', name: 'Salt', qty: 1, expireDate: '2025-02-26', price: 1000 },
+    { id: 5, category: 'Grains', name: 'Rice', qty: 0, expireDate: '2025-02-28', price: 225 },
+    { id: 4, category: 'Sanitary', name: 'Soap', qty: 3, expireDate: '2025-02-24', price: 10 },
   ]);
 
   // Notifications generated from inventory data
@@ -65,7 +65,7 @@ export default function NotificationScreen({ navigation }) {
         });
       }
 
-      // Check for items close to expiration (within 7 days)
+      // Check for items close to expiration ( 7 days)
       const expireDate = new Date(item.expireDate);
       const timeDifference = expireDate - currentDate;
       const daysToExpire = timeDifference / (1000 * 60 * 60 * 24);
@@ -108,7 +108,7 @@ export default function NotificationScreen({ navigation }) {
 
   return (
     <BackgroundFlex>
-      <View>
+      <View style={{width:'100%', flex:1}}>
         <HeaderWithIcon title="Notifications" MoveTo='Dashboard' navigation={navigation} />
         <FlatList
           data={notifications}
@@ -127,13 +127,9 @@ export default function NotificationScreen({ navigation }) {
 }
 
 const styles = StyleSheet.create({
-  header: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    marginBottom: 20,
-    textAlign: 'center',
-  },
+
   notificationItem: {
+    width: '100%',
     padding: 15,
     backgroundColor: '#fff',
     marginBottom: 10,
