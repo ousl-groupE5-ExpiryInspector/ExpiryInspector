@@ -253,15 +253,15 @@ export default function ItemDetail({ route, navigation }) {
 
 const styles = StyleSheet.create({
   placeholderImage: {
-    width: 200,
-    height: 200,
+    width: 180,
+    height: 180,
     borderRadius: 100,
     margin: 10,
   },
   descriptionBox: {
     backgroundColor: '#FFD1C4',
     borderRadius: 5,
-    height: 130,
+    height: 80,
     width: '75%',
     marginTop: 5,
   },
