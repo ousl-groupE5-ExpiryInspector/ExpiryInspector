@@ -5,7 +5,7 @@ import PushNotification from 'react-native-push-notification';
 import NavBar from '../components/navigationBar';
 import HeaderWithIcon from '../components/HeaderWithIcon';
 
-export default function NotificationScreen(navigation) {
+export default function NotificationScreen({ navigation }) {
   // Sample data for items in the inventory
   const [items, setItems] = useState([
     { id: 1, category: 'Dairy', name: 'Milk', qty: 10, expireDate: '2024-12-22', price: 300 },
