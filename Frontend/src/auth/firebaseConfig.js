@@ -1,5 +1,7 @@
 import { initializeApp, getApps, getApp } from 'firebase/app';
-import { getAuth } from 'firebase/auth';
+import { getAuth, initializeAuth, getReactNativePersistence } from 'firebase/auth';
+import { getFirestore } from 'firebase/firestore';
+import ReactNativeAsyncStorage from '@react-native-async-storage/async-storage';
 
 const firebaseConfig = {
   apiKey: "AIzaSyAzprSrCzbesZCEfEw73lgzkr4-53Bnb4o",
@@ -10,8 +12,14 @@ const firebaseConfig = {
   appId: "1:965392943431:android:564e2cacfe1b078ad96462"
 };
 
-// Initialize Firebase app only if no apps are initialized
-const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
-const auth = getAuth(app);
+// Ensure Firebase is initialized only once
+const app = getApps().length ? getApp() : initializeApp(firebaseConfig);
 
-export { auth };
+// ✅ Enable persistent login storage
+const auth = initializeAuth(app, {
+  persistence: getReactNativePersistence(ReactNativeAsyncStorage)
+});
+
+const firestore = getFirestore(app);
+
+export { app, auth, firestore };
