@@ -139,6 +139,7 @@ import BackgroundFlex from '../components/BackgroundFlex';
 import { launchCamera } from 'react-native-image-picker';
 import TextRecognition from '@react-native-ml-kit/text-recognition';
 import { getFirestore, doc, updateDoc } from 'firebase/firestore'; 
+import { getAuth } from 'firebase/auth';
 import { app } from '../auth/firebaseConfig';  
 
 const db = getFirestore(app);
@@ -147,6 +148,7 @@ export default function CameraScreen({ route, navigation }) {
   
   const { itemId } = route.params || {};
   const [image, setImage] = useState(null);
+  const auth = getAuth(app);
   const [capturedData, setCapturedData] = useState({
     text: '',
     expirationDates: [],
@@ -217,6 +219,15 @@ export default function CameraScreen({ route, navigation }) {
       console.error("Error updating Firestore:", error);
       Alert.alert("Error", "Failed to update Firestore. Please try again.");
     }
+
+    navigation.navigate('ItemDetail', {
+      item: {
+        id: itemId,
+        expireDate: capturedData.expirationDates[0] || '',
+        manufactureDate: capturedData.manufactureDates[0] || '',
+        price: capturedData.prices[0] || '',
+      },
+    });
   };
 
   // Functions to extract data
