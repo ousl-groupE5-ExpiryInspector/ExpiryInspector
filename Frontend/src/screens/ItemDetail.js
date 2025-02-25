@@ -9,7 +9,9 @@ import firestore from '@react-native-firebase/firestore';
 
 export default function ItemDetail({ route, navigation }) {
   const handleCamera = () => {
-    navigation.navigate('Camara');
+    //navigation.navigate('Camara');
+    navigation.navigate('Camara', { itemId: item.id });
+
   };
 
   const item = route.params?.item || {
@@ -196,7 +198,7 @@ export default function ItemDetail({ route, navigation }) {
               <Text style={styles.buttonText}>Save Changes</Text>
             </TouchableOpacity>
             <TouchableOpacity style={styles.modalButton} onPress={() => setShowModal(false)}>
-              <Text style={styles.buttonText}>Save Changes</Text>
+              <Text style={styles.buttonText}>cancel</Text>
             </TouchableOpacity>
           </View>
         </Modal>
