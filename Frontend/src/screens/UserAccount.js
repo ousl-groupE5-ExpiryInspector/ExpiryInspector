@@ -195,7 +195,7 @@ return (
       <ActivityIndicator size="large" color="blue" />
     ) : userData ? (
       <>
-        <Text>ID: {userId}</Text>
+        {/*<Text>ID: {userId}</Text>*/}
 
         {/* Profile Picture */}
         <TouchableOpacity onPress={pickImage}>
