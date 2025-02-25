@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, ActivityIndicator, TextInput, Button, Alert, Image, TouchableOpacity, StyleSheet} from 'react-native';
+import { View, Text,StyleSheet, ActivityIndicator, TextInput, Button, Alert, Image, TouchableOpacity} from 'react-native';
 import BackgroundFlex from '../components/BackgroundFlex';
 import HeaderWithIcon from '../components/HeaderWithIcon';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -181,55 +181,64 @@ const uploadImage = async (imageUri) => {
   }
 };
 
-  return (
-    <BackgroundFlex>
-      {/* Header with Back Icon */}
-      <HeaderWithIcon
+return (
+  <BackgroundFlex>
+    {/* Header with Back Icon */}
+     <HeaderWithIcon
         title="User Profile"
         MoveTo="Dashboard"
-        navigation={navigation}
+        
       />
-    <View style={{ padding: 20, alignItems: 'center' }}>
-      {loading ? (
-        <ActivityIndicator size="large" color="blue" />
-      ) : userData ? (
-        <>
-          <Text>ID: {userId}</Text>
+ <View style={styles.container}>
+    {loading ? (
+      <ActivityIndicator size="large" color="blue" />
+    ) : userData ? (
+      <>
+        <Text>ID: {userId}</Text>
 
-          {/* Profile Picture */}
-          <TouchableOpacity onPress={pickImage}>
-            <Image
-              source={profilePicture ? { uri: profilePicture } : require('../../assets/Login.png')}
-              style={{ width: 100, height: 100, borderRadius: 50, marginBottom: 10 }}
-            />
-            <Button title="Upload Profile Picture" onPress={pickImage} />
-
-          </TouchableOpacity>
-
-          <TextInput
-            value={name}
-            onChangeText={setName}
-            placeholder="Enter Name"
-            style={{ borderWidth: 1, padding: 8, marginBottom: 10, width: '100%' }}
+        {/* Profile Picture */}
+        <TouchableOpacity onPress={pickImage}>
+          <Image
+            source={profilePicture ? { uri: profilePicture } : require('../../assets/Login.png')}
+            style={styles.userAccountImg}
           />
-          <TextInput
-            value={email}
-            onChangeText={setEmail}
-            placeholder="Enter Email"
-            style={{ borderWidth: 1, padding: 8, marginBottom: 10, width: '100%' }}
-          />
-          {/* Logout and Delete Account Buttons */}
-          <Button title="Save" onPress={handleSave} />
-          <View style={{ marginTop: 10 }} />
-          <Button title="Logout" color="red" onPress={handleLogout} />
-        </>
-      ) : (
-        <Text>No user logged in</Text>
-      )}
-    </View>
+          <Button title="Upload Profile Picture" onPress={pickImage} />
+
+        </TouchableOpacity>
+
+          {/* Update Name and Email */}
+          <View style={styles.infoContainer}>
+          <Text style={styles.label}>Name:</Text>
+        <TextInput
+        style={styles.infoText}
+          value={name}
+          onChangeText={setName}
+          placeholder="Enter Name"
+        />
+
+<Text style={styles.label}>Email:</Text>
+        <TextInput
+          value={email}
+          style={styles.infoText}
+          onChangeText={setEmail}
+          placeholder="Enter Email"
+        />
+</View>
+         {/* Save Button */}
+        <Button style={styles.logoutButton} title="Save" onPress={handleSave} />
+
+
+        {/* Logout and Delete Account Buttons */}
+        <Button title="Logout" style={styles.logoutButton} onPress={handleLogout} />
+      </>
+    ) : (
+      <Text>No user logged in</Text>
+    )}
+  </View>
   </BackgroundFlex>
-  );
+);
 }
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
