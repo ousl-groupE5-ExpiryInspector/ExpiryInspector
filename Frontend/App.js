@@ -26,9 +26,11 @@ const App=()=> {
       <stack.Screen  name={'Welcome'} component={LandingPage} options={{ headerShown: false }}/>
       <stack.Screen  name={'SignUp'} component={SignInScreen} options={{ headerShown: false }}/>
       <stack.Screen  name={'Login'} component={LoginScreen} options={{ headerShown: false }}/>
+
       <stack.Screen  name={'FogotPassword'} component={FogotPasswordSC} options={{ headerShown: false }}/>
-      <stack.Screen  name={'UserProfile'} component={UserAccount}/>
-      <stack.Screen  name={'Dashboard'} component={Dashboard}/>
+      <stack.Screen  name={'UserProfile'} component={UserAccount} options={{ headerShown: false }}/>
+      <stack.Screen  name={'Dashboard'} component={Dashboard} options={{ headerShown: false }}/>
+
 
       <stack.Screen name={'InventoryAvailable'} component={InventoryScreen} options={{ headerShown: false }}/>
       <stack.Screen name={'InventoryExpired'} component={InventoryExpired} options={{ headerShown: false }}/>
@@ -40,7 +42,7 @@ const App=()=> {
 
       <stack.Screen name={'FAQ'} component={FAQScreen} options={{ headerShown: false }}/>
 
-      <stack.Screen name={'Notification'} component={NotificationScreen} options={{ headerShown: true }}/>
+      <stack.Screen name={'Notification'} component={NotificationScreen} options={{ headerShown: false }}/>
       
       <stack.Screen name={'Camara'} component={CamaraScreen} options={{ headerShown: true }}/>
 
