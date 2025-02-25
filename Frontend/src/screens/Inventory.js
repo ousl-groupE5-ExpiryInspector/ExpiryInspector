@@ -18,31 +18,47 @@ export default function InventoryScreen({ navigation }) {
     const userId = auth().currentUser?.uid;
     if (!userId) return;
 
-    const unsubscribe = firestore()
-      .collection('users')
-      .doc(userId)
-      .onSnapshot((doc) => {
-        if (doc.exists) {
-          const categories = doc.data().categories || [];
-          const formattedData = categories.map((category, index) => {
-            const inStock = category.items ? category.items.length : 0;
-            const totalValue = category.items
-              ? category.items.reduce((sum, item) => sum + (item.price || 0), 0)
-              : 0;
-            return {
-              id: index.toString(),
-              category: category.name,
-              inStock,
-              expiringSoon: category.expiringSoon || 0, // Keep if required
-              totalValue,
-              description: category.description || '',
-            };
-          });
-          setStocks(formattedData);
-        }
-      });
+    // Fetch categories from users collection
+    const userRef = firestore().collection('users').doc(userId);
+    userRef.get().then(async (doc) => {
+      if (doc.exists) {
+        const categories = doc.data().categories || []; // Get categories array from user
 
-    return () => unsubscribe();
+        // Fetch items for each category
+        const categoryPromises = categories.map(async (category) => {
+          const itemsSnapshot = await firestore()
+            .collection('items')
+            .where('userId', '==', userId)
+            .where('category', '==', category.name)
+            .get();
+
+          const items = itemsSnapshot.docs.map((doc) => doc.data());
+
+          // Calculate values
+          const inStock = items.length;
+          const totalValue = items.reduce(
+            (sum, item) => sum + ((Number(item.qty) || 0) * (Number(item.price) || 0)),
+            0
+          );
+          const expiringSoon = items.filter(item =>
+            new Date(item.expireDate) < new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
+          ).length;
+
+          return {
+            id: category.name, // Use category name as unique ID
+            category: category.name,
+            description: category.description || '',
+            inStock,
+            expiringSoon,
+            totalValue,
+          };
+        });
+
+        // Wait for all category data to be fetched
+        const stockData = await Promise.all(categoryPromises);
+        setStocks(stockData);
+      }
+    });
   }, []);
 
   const renderItem = ({ item }) => (
@@ -70,7 +86,7 @@ export default function InventoryScreen({ navigation }) {
 
   return (
     <BackgroundFlex>
-      <HeaderWithIcon title="Stocks" MoveTo='Dashboard' navigation={navigation} />
+      <HeaderWithIcon title="Stocks" MoveTo="Dashboard" navigation={navigation} />
       <TopBarButtons
         style={{ padding: -20 }}
         onExpiredPress={() => navigation.navigate('InventoryExpired')}
@@ -87,6 +103,8 @@ export default function InventoryScreen({ navigation }) {
     </BackgroundFlex>
   );
 }
+
+
 
 const styles = StyleSheet.create({
   stockItem: {
