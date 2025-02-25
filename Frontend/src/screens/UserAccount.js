@@ -10,7 +10,7 @@ import { signOut, onAuthStateChanged } from 'firebase/auth';
 import { auth, firestore, storage } from '../auth/firebaseConfig';
 import { initializeApp } from 'firebase/app';
 
-export default function UserAccount() {
+export default function UserAccount({navigation}) {
   const [userData, setUserData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [name, setName] = useState('');
@@ -183,11 +183,12 @@ const uploadImage = async (imageUri) => {
 
 return (
   <BackgroundFlex>
+
     {/* Header with Back Icon */}
-     <HeaderWithIcon
+      <HeaderWithIcon
         title="User Profile"
         MoveTo="Dashboard"
-        
+        navigation={navigation}
       />
  <View style={styles.container}>
     {loading ? (
@@ -207,8 +208,8 @@ return (
         </TouchableOpacity>
 
           {/* Update Name and Email */}
-          <View style={styles.infoContainer}>
-          <Text style={styles.label}>Name:</Text>
+    <View style={styles.infoContainer}>
+      <Text style={styles.label}>Name:</Text>
         <TextInput
         style={styles.infoText}
           value={name}
@@ -216,24 +217,24 @@ return (
           placeholder="Enter Name"
         />
 
-<Text style={styles.label}>Email:</Text>
+      <Text style={styles.label}>Email:</Text>
         <TextInput
+         style={styles.infoText}
           value={email}
-          style={styles.infoText}
           onChangeText={setEmail}
           placeholder="Enter Email"
         />
 </View>
          {/* Save Button */}
         <Button style={styles.logoutButton} title="Save" onPress={handleSave} />
+        
 
-
-        {/* Logout and Delete Account Buttons */}
+         {/* Logout and Delete Account Buttons */}
         <Button title="Logout" style={styles.logoutButton} onPress={handleLogout} />
-      </>
-    ) : (
-      <Text>No user logged in</Text>
-    )}
+        </>
+  ) : (
+    <Text>No user logged in</Text>
+  )}
   </View>
   </BackgroundFlex>
 );
