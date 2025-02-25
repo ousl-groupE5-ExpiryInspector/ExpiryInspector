@@ -22,7 +22,7 @@ const App=()=> {
   return (
   <>
   <NavigationContainer>
-    <stack.Navigator initialRouteName="Dashboard">
+    <stack.Navigator initialRouteName="Welcome">
       <stack.Screen  name={'Welcome'} component={LandingPage} options={{ headerShown: false }}/>
       <stack.Screen  name={'SignUp'} component={SignInScreen} options={{ headerShown: false }}/>
       <stack.Screen  name={'Login'} component={LoginScreen} options={{ headerShown: false }}/>
@@ -42,7 +42,7 @@ const App=()=> {
 
       <stack.Screen name={'FAQ'} component={FAQScreen} options={{ headerShown: false }}/>
 
-      <stack.Screen name={'Notification'} component={NotificationScreen} options={{ headerShown: true }}/>
+      <stack.Screen name={'Notification'} component={NotificationScreen} options={{ headerShown: false }}/>
       
       <stack.Screen name={'Camara'} component={CamaraScreen} options={{ headerShown: true }}/>
 

@@ -31,6 +31,8 @@ npm install @react-navigation/native-stack
 
 ---------------Firebase Authentication-------------
 
+npm install firebase
+
 npm install @react-native-firebase/app @react-native-firebase/auth
 
 ---------------Firestore-------------
@@ -43,6 +45,19 @@ npm install react-native-image-picker
 
 
 npm install @react-native-ml-kit/text-recognition react-native-image-picker
+
+--------------Notification--------------------------
+npm install react-native-push-notification
+
+AndroidManifest.xml
+<uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+
+<meta-data
+    android:name="com.dieam.reactnativepushnotification.notification_channel_name"
+    android:value="General Notifications" />
+<meta-data
+    android:name="com.dieam.reactnativepushnotification.notification_channel_description"
+    android:value="Notifications for item updates." />
 
  
 ---------------------other--------------------------

@@ -20,8 +20,8 @@ export default function UserAccount({ navigation }) {
     // Simulate fetching default user data from an external database
     const fetchUserData = async () => {
       const defaultData = {
-        name: 'Sahani Weerasinghe',
-        email: 'sahani123@ousl.com',
+        name: 'Pradeep',
+        email: 's18003202@ousl.lk',
         image: null,
       };
       setUserData(defaultData);
