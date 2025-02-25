@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, ActivityIndicator, TextInput, Button, Alert, Image, TouchableOpacity } from 'react-native';
+import { View, Text, ActivityIndicator, TextInput, Button, Alert, Image, TouchableOpacity, StyleSheet} from 'react-native';
+import BackgroundFlex from '../components/BackgroundFlex';
+import HeaderWithIcon from '../components/HeaderWithIcon';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { doc, getDoc, updateDoc } from 'firebase/firestore';
 import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
@@ -180,6 +182,13 @@ const uploadImage = async (imageUri) => {
 };
 
   return (
+    <BackgroundFlex>
+      {/* Header with Back Icon */}
+      <HeaderWithIcon
+        title="User Profile"
+        MoveTo="Dashboard"
+        navigation={navigation}
+      />
     <View style={{ padding: 20, alignItems: 'center' }}>
       {loading ? (
         <ActivityIndicator size="large" color="blue" />
@@ -209,6 +218,7 @@ const uploadImage = async (imageUri) => {
             placeholder="Enter Email"
             style={{ borderWidth: 1, padding: 8, marginBottom: 10, width: '100%' }}
           />
+          {/* Logout and Delete Account Buttons */}
           <Button title="Save" onPress={handleSave} />
           <View style={{ marginTop: 10 }} />
           <Button title="Logout" color="red" onPress={handleLogout} />
@@ -217,5 +227,61 @@ const uploadImage = async (imageUri) => {
         <Text>No user logged in</Text>
       )}
     </View>
+  </BackgroundFlex>
   );
 }
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: '100%',
+  },
+  userAccountImg: {
+    width: 200,
+    height: 200,
+    borderRadius: 75,
+    resizeMode: 'contain',
+    marginBottom: 30,
+  },
+  infoContainer: {
+    width: '80%',
+    marginBottom: 40,
+  },
+  label: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    marginBottom: 5,
+    color: 'white',
+  },
+  infoText: {
+    fontSize: 18,
+    backgroundColor: '#d3d3d3',
+    padding: 10,
+    borderRadius: 8,
+    marginBottom: 20,
+    color: 'black',
+  },
+  logoutButton: {
+    width: '80%',
+    height: 50,
+    backgroundColor: 'black',
+    borderRadius: 10,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 10,
+  },
+  deleteButton: {
+    width: '80%',
+    height: 50,
+    backgroundColor: '#8B0000',
+    borderRadius: 10,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  buttonText: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: 'white',
+  },
+});
