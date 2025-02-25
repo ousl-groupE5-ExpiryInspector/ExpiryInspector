@@ -39,9 +39,11 @@ export default function SignUpScreen({ navigation }) {
   
       // Default categories stored as a field inside user document
       const defaultCategories = [
-        { name: 'Dairy', items: [] },
-        { name: 'Spices', items: [] },
-        { name: 'Grains', items: [] }
+        { name: 'Dairy', description: 'Milk, Cheese, Yogurt, and more.', items: [] },
+        { name: 'Spices', description: 'Various spices including turmeric, cumin, and more.', items: [] },
+        { name: 'Grains', description: 'Rice, wheat, etc.', items: [] },
+        { name: 'Glossary', description: 'Other items.', items: [] },
+        { name: 'Sanitary', description: 'Sanitary items.', items: [] },
       ];
   
       // Store user data including categories
