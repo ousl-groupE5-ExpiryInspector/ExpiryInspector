@@ -6,7 +6,8 @@ import BackgroundFlex from '../components/BackgroundFlex';
 import { launchCamera } from 'react-native-image-picker';
 import TextRecognition from '@react-native-ml-kit/text-recognition';
 
-export default function CameraScreen({ navigation }) {
+export default function CameraScreen({ route, navigation }) {
+  const { itemId } = route.params || {};
   const [image, setImage] = useState(null);
   const [capturedData, setCapturedData] = useState({
     text: '',
@@ -58,17 +59,21 @@ export default function CameraScreen({ navigation }) {
   };
 
   const handleSave = () => {
-    const { expirationDates, manufactureDates, prices } = capturedData;
-
-    // Pass the captured data to the ItemDetail screen
+    if (!itemId) {
+      Alert.alert("Error", "No item ID found. Cannot update Firestore.");
+      return;
+    }
+  
     navigation.navigate('ItemDetail', {
       item: {
-        expireDate: expirationDates[0] || '',
-        manufactureDate: manufactureDates[0] || '',
-        price: prices[0] || '',
+        id: itemId,
+        expireDate: capturedData.expirationDates[0] || '',
+        manufactureDate: capturedData.manufactureDates[0] || '',
+        price: capturedData.prices[0] || '',
       },
     });
   };
+  
 
   // Functions to extract data
   const extractExpirationDates = (text) => {

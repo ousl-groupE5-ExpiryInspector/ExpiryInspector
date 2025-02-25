@@ -5,9 +5,10 @@ import { doc, getDoc, updateDoc } from 'firebase/firestore';
 import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { launchImageLibrary } from 'react-native-image-picker';
 import { signOut, onAuthStateChanged } from 'firebase/auth';
-import { auth, firestore } from '../auth/firebaseConfig';
+import { auth, firestore, storage } from '../auth/firebaseConfig';
+import { initializeApp } from 'firebase/app';
 
-export default function CurrentUser() {
+export default function UserAccount() {
   const [userData, setUserData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [name, setName] = useState('');
@@ -15,11 +16,11 @@ export default function CurrentUser() {
   const [profilePicture, setProfilePicture] = useState(null);
   const [userId, setUserId] = useState(null);
 
-  const storage = getStorage();
+  //const app = initializeApp(firebaseConfig);
 
   const saveUserId = async (userId) => {
     try {
-      await AsyncStorage.setItem('userId', userId);
+      await AsyncStorage.setItem('userUId', userId);
       console.log('✅ User ID saved to AsyncStorage:', userId);
     } catch (error) {
       console.error('❌ Error saving user ID:', error);
@@ -104,7 +105,7 @@ export default function CurrentUser() {
   const handleLogout = async () => {
     try {
       await signOut(auth);
-      await AsyncStorage.removeItem('userId');
+      await AsyncStorage.removeItem('userUId');
       setUserData(null);
       setUserId(null);
       Alert.alert('Logged Out', 'You have been logged out successfully.');
@@ -168,7 +169,7 @@ const uploadImage = async (imageUri) => {
         const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
         console.log('✅ Image uploaded successfully:', downloadURL);
         setProfilePicture(downloadURL);
-        await updateDoc(doc(firestore, 'users', userId), { profilePicture: downloadURL });
+        await updateDoc(doc(firestore, 'users', userId), { profile_Picture: downloadURL });
         Alert.alert('Success', 'Profile picture updated!');
       }
     );
