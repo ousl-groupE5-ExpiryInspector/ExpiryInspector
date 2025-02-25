@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, FlatList, StyleSheet, TouchableOpacity} from 'react-native';
+import { View, Text, FlatList, StyleSheet, TouchableOpacity } from 'react-native';
+import firestore from '@react-native-firebase/firestore';
+import auth from '@react-native-firebase/auth';
 import BackgroundFlex from '../components/BackgroundFlex';
 import HeaderWithIcon from '../components/HeaderWithIcon';
 import TopBarButtons from '../components/TopBarButtons';
@@ -9,39 +11,43 @@ import NumberValue from '../components/NumberValue';
 import DescriptionText from '../components/DescriptionText';
 import NavBar from '../components/navigationBar';
 
-
 export default function InventoryScreen({ navigation }) {
-
-  const moveExpiredPress = () => {
-    navigation.navigate('InventoryExpired');
-  };
-
-  const moveAvailablePress = () => {
-    navigation.navigate('InventoryAvailable');
-  };
-
-  const moveOutOfStockPress = () => {
-    navigation.navigate('InventoryOutOfStock');
-  };
-
   const [stocks, setStocks] = useState([]);
 
   useEffect(() => {
-    const sampleData = [
-      { id: 1, category: 'Dairy', inStock: 50, expiringSoon: 5, totalValue: 150.00, description: 'Milk, Cheese, Yogurt, and more.' },
-      { id: 2, category: 'Glossary', inStock: 100, expiringSoon: 10, totalValue: 200.00, description: 'Other items.' },
-      { id: 3, category: 'Spices', inStock: 40, expiringSoon: 2, totalValue: 80.00, description: 'Various spices including turmeric, cumin, and more.' },
-      { id: 4, category: 'Beverages', inStock: 75, expiringSoon: 7, totalValue: 350.00, description: 'Juices, soft drinks, water, and more.' },
-      { id: 5, category: 'Grains', inStock: 40, expiringSoon: 2, totalValue: 800.00, description: 'Rice, wheat, etc.' },
-      { id: 6, category: 'Sanitary', inStock: 75, expiringSoon: 7, totalValue: 300.00, description: 'Sanitary items.' },
-    ];
-    setStocks(sampleData);
+    const userId = auth().currentUser?.uid;
+    if (!userId) return;
+
+    const unsubscribe = firestore()
+      .collection('users')
+      .doc(userId)
+      .onSnapshot((doc) => {
+        if (doc.exists) {
+          const categories = doc.data().categories || [];
+          const formattedData = categories.map((category, index) => {
+            const inStock = category.items ? category.items.length : 0;
+            const totalValue = category.items
+              ? category.items.reduce((sum, item) => sum + (item.price || 0), 0)
+              : 0;
+            return {
+              id: index.toString(),
+              category: category.name,
+              inStock,
+              expiringSoon: category.expiringSoon || 0, // Keep if required
+              totalValue,
+              description: category.description || '',
+            };
+          });
+          setStocks(formattedData);
+        }
+      });
+
+    return () => unsubscribe();
   }, []);
 
   const renderItem = ({ item }) => (
     <TouchableOpacity onPress={() => navigation.navigate('ItemList', { category: item.category })}>
       <View style={styles.stockItem}>
-
         <View style={styles.leftColumn}>
           <Title2>{item.category}</Title2>
           <DescriptionText>{item.description}</DescriptionText>
@@ -58,29 +64,24 @@ export default function InventoryScreen({ navigation }) {
           <NumberValue>{item.expiringSoon}</NumberValue>
           <NumberValue>{item.totalValue.toFixed(2)}</NumberValue>
         </View>
-        
       </View>
     </TouchableOpacity>
   );
 
   return (
     <BackgroundFlex>
-      <HeaderWithIcon
-        title="Stocks"
-        MoveTo='Dashboard'
-        navigation={navigation}
+      <HeaderWithIcon title="Stocks" MoveTo='Dashboard' navigation={navigation} />
+      <TopBarButtons
+        style={{ padding: -20 }}
+        onExpiredPress={() => navigation.navigate('InventoryExpired')}
+        onAvailablePress={() => navigation.navigate('InventoryAvailable')}
+        onOutOfStockPress={() => navigation.navigate('InventoryOutOfStock')}
       />
-      <TopBarButtons style={{padding:-20}}
-        onExpiredPress={moveExpiredPress}
-        onAvailablePress={moveAvailablePress}
-        onOutOfStockPress={moveOutOfStockPress}
-      />
-
       <FlatList
         data={stocks}
-        keyExtractor={(item) => item.id.toString()}
+        keyExtractor={(item) => item.id}
         renderItem={renderItem}
-        contentContainerStyle={styles.listContainer} 
+        contentContainerStyle={styles.listContainer}
       />
       <NavBar navigation={navigation} />
     </BackgroundFlex>
@@ -114,7 +115,7 @@ const styles = StyleSheet.create({
     alignItems: 'flex-end',
   },
   listContainer: {
-    margineTop: 20,
+    marginTop: 20,
     paddingHorizontal: 10,
   },
 });
