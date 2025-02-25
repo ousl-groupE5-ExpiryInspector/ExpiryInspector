@@ -15,7 +15,7 @@ export default function ItemList({ route, navigation }) {
   const userId = auth().currentUser?.uid;
   const [items, setItems] = useState([]);
   const [showModal, setShowModal] = useState(false);
-  const [newItem, setNewItem] = useState({ name: '', qty: '', expireDate: '', price: '' });
+  const [newItem, setNewItem] = useState({ name: '', qty: 0, expireDate: '', price: 0 });
   const [totalValue, setTotalValue] = useState(0);
   const [expiringSoonCount, setExpiringSoonCount] = useState(0);
 
@@ -38,7 +38,10 @@ export default function ItemList({ route, navigation }) {
     let total = 0;
     let expiringSoon = 0;
     itemList.forEach(item => {
-      total += item.qty * item.price;
+      //const qty = item.qty ?? 0; 
+      const qty = Number(item.qty) || 0;  // Convert to number, default = 0
+      const price = Number(item.price) || 0;
+      total += qty * price;
       if (new Date(item.expireDate) < new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)) {
         expiringSoon++;
       }
@@ -69,7 +72,7 @@ export default function ItemList({ route, navigation }) {
         price: parseFloat(newItem.price)
       };
       await firestore().collection('items').add(newItemData);
-      setNewItem({ name: '', qty: '', expireDate: '', price: '' });
+      setNewItem({ name: '', qty: 0, expireDate: '', price: 0 });
       setShowModal(false);
     } else {
       Alert.alert('Error', 'Please fill all required fields');
@@ -80,7 +83,7 @@ export default function ItemList({ route, navigation }) {
     <TouchableOpacity onPress={() => navigation.navigate('ItemDetail', { item })}>
       <View style={styles.item}>
         <Text style={styles.col1}>{item.name}</Text>
-        <Text style={styles.col2}>{item.qty}</Text>
+        <Text style={styles.col2}>{item.qty ? Number(item.qty) : 0}</Text>
         <Text style={styles.col3}>{item.expireDate}</Text>
         <TouchableOpacity style={styles.col4} onPress={() => deleteItem(item.id)}>
           <Image source={require('../../assets/Delete_icon.png')} style={{ width: 25, height: 25 }} />
