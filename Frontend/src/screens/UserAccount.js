@@ -223,14 +223,21 @@ return (
           value={email}
           onChangeText={setEmail}
           placeholder="Enter Email"
+          keyboardType="email-address"
         />
 </View>
          {/* Save Button */}
-        <Button style={styles.logoutButton} title="Save" onPress={handleSave} />
-        
-
+         <TouchableOpacity style={styles.logoutButton} onPress={handleSave}>
+          <Text style={styles.buttonText}>Save Changes</Text>
+        </TouchableOpacity>
+       
          {/* Logout and Delete Account Buttons */}
-        <Button title="Logout" style={styles.logoutButton} onPress={handleLogout} />
+        <TouchableOpacity style={styles.logoutButton}  onPress={handleLogout}>
+          <Text style={styles.buttonText}>Logout</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.deleteButton}>
+          <Text style={styles.buttonText}>Delete account</Text>
+        </TouchableOpacity>
         </>
   ) : (
     <Text>No user logged in</Text>
