@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text,StyleSheet, ActivityIndicator, TextInput, Button, Alert, Image, TouchableOpacity} from 'react-native';
+import { View, Text, StyleSheet, ActivityIndicator, TextInput, Button, Alert, Image, TouchableOpacity } from 'react-native';
 import BackgroundFlex from '../components/BackgroundFlex';
 import HeaderWithIcon from '../components/HeaderWithIcon';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -10,7 +10,7 @@ import { signOut, onAuthStateChanged } from 'firebase/auth';
 import { auth, firestore, storage } from '../auth/firebaseConfig';
 import { initializeApp } from 'firebase/app';
 
-export default function UserAccount({navigation}) {
+export default function UserAccount({ navigation }) {
   const [userData, setUserData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [name, setName] = useState('');
@@ -119,13 +119,13 @@ export default function UserAccount({navigation}) {
   };
 
   // Function to pick an image from the gallery and upload it to Firebase Storage
-
+  
   const pickImage = async () => {
     const options = {
       mediaType: 'photo',
       quality: 1, // Best quality
     };
-  
+     
     launchImageLibrary(options, async (response) => {
       if (response.didCancel) {
         console.log('User cancelled image picker');
@@ -142,109 +142,108 @@ export default function UserAccount({navigation}) {
       }
     });
   };
-  
 
-// Function to upload image to Firebase Storage
-const uploadImage = async (imageUri) => {
-  if (!userId) {
-    Alert.alert('Error', 'User ID not found.');
-    return;
-  }
 
-  try {
-    const response = await fetch(imageUri);
-    const blob = await response.blob();
-    const storageRef = ref(storage, `profile_pictures/${userId}.jpg`);
-    const uploadTask = uploadBytesResumable(storageRef, blob);
+  // Function to upload image to Firebase Storage
+  const uploadImage = async (imageUri) => {
+    if (!userId) {
+      Alert.alert('Error', 'User ID not found.');
+      return;
+    }
 
-    uploadTask.on(
-      'state_changed',
-      (snapshot) => {
-        const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-        console.log(`Upload is ${progress}% done`);
-      },
-      (error) => {
-        console.error('❌ Error uploading image:', error);
-        Alert.alert('Upload Error', 'Failed to upload profile picture.');
-      },
-      async () => {
-        const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
-        console.log('✅ Image uploaded successfully:', downloadURL);
-        setProfilePicture(downloadURL);
-        await updateDoc(doc(firestore, 'users', userId), { profile_Picture: downloadURL });
-        Alert.alert('Success', 'Profile picture updated!');
-      }
-    );
-  } catch (error) {
-    console.error('❌ Error uploading image:', error);
-    Alert.alert('Error', 'Failed to upload image.');
-  }
-};
+    try {
+      const response = await fetch(imageUri);
+      const blob = await response.blob();
+      const storageRef = ref(storage, `profile_pictures/${userId}.jpg`);
+      const uploadTask = uploadBytesResumable(storageRef, blob);
 
-return (
-  <BackgroundFlex>
+      uploadTask.on(
+        'state_changed',
+        (snapshot) => {
+          const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+          console.log(`Upload is ${progress}% done`);
+        },
+        (error) => {
+          console.error('❌ Error uploading image:', error);
+          Alert.alert('Upload Error', 'Failed to upload profile picture.');
+        },
+        async () => {
+          const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
+          console.log('✅ Image uploaded successfully:', downloadURL);
+          setProfilePicture(downloadURL);
+          await updateDoc(doc(firestore, 'users', userId), { profile_Picture: downloadURL });
+          Alert.alert('Success', 'Profile picture updated!');
+        }
+      );
+    } catch (error) {
+      console.error('❌ Error uploading image:', error);
+      Alert.alert('Error', 'Failed to upload image.');
+    }
+  };
 
-    {/* Header with Back Icon */}
+  return (
+    <BackgroundFlex>
+      {/* Header with Back Icon */}
       <HeaderWithIcon
         title="User Profile"
         MoveTo="Dashboard"
         navigation={navigation}
       />
- <View style={styles.container}>
-    {loading ? (
-      <ActivityIndicator size="large" color="blue" />
-    ) : userData ? (
-      <>
-        {/*<Text>ID: {userId}</Text>*/}
+      <View style={styles.container}>
+        {loading ? (
+          <ActivityIndicator size="large" color="blue" />
+        ) : userData ? (
+          <>
 
-        {/* Profile Picture */}
-        <TouchableOpacity onPress={pickImage}>
-          <Image
-            source={profilePicture ? { uri: profilePicture } : require('../../assets/Login.png')}
-            style={styles.userAccountImg}
-          />
-          <Button title="Upload Profile Picture" onPress={pickImage} />
+            {/* User Avatar */}
+            <TouchableOpacity onPress={pickImage}>
+              {userData.image ? (
+                <Image source={{ uri: userData.image }} style={styles.userAccountImg} />
+              ) : (
+                <Image source={require('../../assets/userAccount_pic.png')} style={styles.userAccountImg} />
+              )}
+            </TouchableOpacity>
 
-        </TouchableOpacity>
+            {/* Update Name and Email */}
+            <View style={styles.infoContainer}>
+              <Text style={styles.label}>Name:</Text>
+              <TextInput
+                style={styles.infoText}
+                value={name}
+                onChangeText={setName}
+                placeholder="Enter Name"
+              />
 
-          {/* Update Name and Email */}
-    <View style={styles.infoContainer}>
-      <Text style={styles.label}>Name:</Text>
-        <TextInput
-        style={styles.infoText}
-          value={name}
-          onChangeText={setName}
-          placeholder="Enter Name"
-        />
+              <Text style={styles.label}>Email:</Text>
+              <TextInput
+                style={styles.infoText}
+                value={email}
+                onChangeText={setEmail}
+                placeholder="Enter Email"
+                keyboardType="email-address"
+              />
+            </View>
 
-      <Text style={styles.label}>Email:</Text>
-        <TextInput
-         style={styles.infoText}
-          value={email}
-          onChangeText={setEmail}
-          placeholder="Enter Email"
-          keyboardType="email-address"
-        />
-</View>
-         {/* Save Button */}
-         <TouchableOpacity style={styles.logoutButton} onPress={handleSave}>
-          <Text style={styles.buttonText}>Save Changes</Text>
-        </TouchableOpacity>
-       
-         {/* Logout and Delete Account Buttons */}
-        <TouchableOpacity style={styles.logoutButton}  onPress={handleLogout}>
-          <Text style={styles.buttonText}>Logout</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.deleteButton}>
-          <Text style={styles.buttonText}>Delete account</Text>
-        </TouchableOpacity>
-        </>
-  ) : (
-    <Text>No user logged in</Text>
-  )}
-  </View>
-  </BackgroundFlex>
-);
+            {/* Save Button */}
+            <TouchableOpacity style={styles.logoutButton} onPress={handleSave}>
+              <Text style={styles.buttonText}>Save Changes</Text>
+            </TouchableOpacity>
+
+            {/* Logout and Delete Account Buttons */}
+            <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
+              <Text style={styles.buttonText}>Logout</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity style={styles.deleteButton}>
+              <Text style={styles.buttonText}>Delete account</Text>
+            </TouchableOpacity>
+          </>
+        ) : (
+          <Text>No user logged in</Text>
+        )}
+      </View>
+    </BackgroundFlex>
+  );
 }
 
 const styles = StyleSheet.create({
