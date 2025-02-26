@@ -119,21 +119,13 @@ export default function UserAccount({ navigation }) {
   };
 
   // Function to pick an image from the gallery and upload it to Firebase Storage
-  
-  const pickImage = async () => {
-    const options = {
-      mediaType: 'photo',
-      quality: 1, // Best quality
-    };
-     
-    launchImageLibrary(options, async (response) => {
-      if (response.didCancel) {
-        console.log('User cancelled image picker');
+  const pickImage = () => {
+    launchImageLibrary({ mediaType: 'photo', quality: 1 }, response => {
+      if (!response.didCancel && !response.error) {
+        const imageUri = response.assets[0].uri;
+        setUserData({ ...userData, image: imageUri });
         return;
-      }
-      if (response.errorMessage) {
-        console.log('ImagePicker Error: ', response.errorMessage);
-        return;
+
       }
       if (response.assets && response.assets.length > 0) {
         const selectedImage = response.assets[0].uri;
@@ -142,7 +134,6 @@ export default function UserAccount({ navigation }) {
       }
     });
   };
-
 
   // Function to upload image to Firebase Storage
   const uploadImage = async (imageUri) => {
