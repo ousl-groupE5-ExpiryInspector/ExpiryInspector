@@ -13,15 +13,15 @@ export default function NotificationScreen({ navigation }) {
 
   useEffect(() => {
     const userId = auth().currentUser?.uid;
-    console.log("🔍 Checking authentication...", userId);
+    console.log(" Checking authentication...", userId);
 
     if (!userId) {
-      console.error("🚨 User not authenticated, cannot fetch items.");
+      console.error(" User not authenticated, cannot fetch items.");
       return;
     }
 
-    console.log("✅ User authenticated:", userId);
-    console.log("📡 Fetching items from Firestore...");
+    console.log(" User authenticated:", userId);
+    console.log(" Fetching items from Firestore...");
 
     const unsubscribe = firebase.firestore()
       .collection('items') // firebase.firestore()
@@ -29,19 +29,19 @@ export default function NotificationScreen({ navigation }) {
       .onSnapshot(
         snapshot => {
           if (!snapshot.empty) {
-            console.log("✅ Firestore connection successful.");
+            console.log(" *Firestore connection successful.*");
           } else {
-            console.warn("⚠️ No items found for this user.");
+            console.warn(" No items found for this user.");
           }
 
           const fetchedItems = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-          console.log("✅ Firestore Data Fetched:", fetchedItems);
+          console.log(" ### Firestore Data Fetched ###:", fetchedItems);
 
           setItems(fetchedItems);
           refreshNotifications(fetchedItems);
         },
         error => {
-          console.error("❌ Error fetching Firestore data:", error);
+          console.error("********* Error fetching Firestore data: ", error);
         }
       );
 
@@ -49,11 +49,11 @@ export default function NotificationScreen({ navigation }) {
   }, []);
 
   useEffect(() => {
-    console.log("🔔 Setting up push notifications...");
+    console.log(" Setting up push notifications...");
 
     PushNotification.configure({
       onNotification: (notification) => {
-        console.log("📨 Notification Received:", notification);
+        console.log(" Notification Received:", notification);
       },
       popInitialNotification: true,
       requestPermissions: true,
@@ -64,10 +64,10 @@ export default function NotificationScreen({ navigation }) {
 
   const checkAndCreateNotificationChannel = () => {
     PushNotification.getChannels((channelIds) => {
-      console.log("🔍 Existing Notification Channels:", channelIds);
+      console.log(" Existing Notification Channels:", channelIds);
 
       if (!channelIds.includes('item-alerts')) {
-        console.log("📢 Creating Notification Channel...");
+        console.log(" Creating Notification Channel...");
         PushNotification.createChannel(
           {
             channelId: 'item-alerts',
@@ -76,21 +76,21 @@ export default function NotificationScreen({ navigation }) {
             importance: PushNotification.Importance.HIGH,
             vibrate: true,
           },
-          (created) => console.log(created ? "✅ Notification Channel created." : "⚠️ Notification Channel creation failed.")
+          (created) => console.log(created ? "Notification Channel created." : " Notification Channel creation failed.")
         );
       } else {
-        console.log("⚠️ Notification Channel already exists.");
+        console.log("Notification Channel already exists.");
       }
     });
   };
 
   const refreshNotifications = (itemsToCheck = items) => {
     if (!itemsToCheck.length) {
-      console.log("⚠️ No items to check for notifications.");
+      console.log("No items to check for notifications.");
       return;
     }
 
-    console.log("🔄 Checking items for notifications...");
+    console.log("Checking items for notifications...");
     const newNotifications = [];
     const currentDate = new Date();
 
@@ -120,7 +120,7 @@ export default function NotificationScreen({ navigation }) {
   };
 
   const deleteNotification = (id) => {
-    console.log(`🗑 Deleting notification: ${id}`);
+    console.log(`Deleting notification: ${id}`);
     setNotifications((prev) => prev.filter((notif) => notif.id !== id));
     Alert.alert('Notification deleted');
   };
