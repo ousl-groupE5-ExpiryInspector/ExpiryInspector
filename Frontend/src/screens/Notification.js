@@ -4,8 +4,8 @@ import BackgroundFlex from '../components/BackgroundFlex';
 import PushNotification from 'react-native-push-notification';
 import NavBar from '../components/navigationBar';
 import HeaderWithIcon from '../components/HeaderWithIcon';
-import { firebase } from '@react-native-firebase/firestore'; // ✅ Corrected Firestore import
-import auth from '@react-native-firebase/auth'; // ✅ Added Firebase Authentication import
+import { firebase } from '@react-native-firebase/firestore'; 
+import auth from '@react-native-firebase/auth'; 
 
 export default function NotificationScreen({ navigation }) {
   const [notifications, setNotifications] = useState([]);
@@ -24,7 +24,7 @@ export default function NotificationScreen({ navigation }) {
     console.log("📡 Fetching items from Firestore...");
 
     const unsubscribe = firebase.firestore()
-      .collection('items') // ✅ Used firebase.firestore()
+      .collection('items') // firebase.firestore()
       .where('userId', '==', userId)
       .onSnapshot(
         snapshot => {
