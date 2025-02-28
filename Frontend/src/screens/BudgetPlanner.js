@@ -4,7 +4,7 @@ import BackgroundFlex from '../components/BackgroundFlex';
 import HeaderWithIcon from '../components/HeaderWithIcon';
 import Title3 from '../components/Title3';
 import Title2 from '../components/Title2';
-import CoverNums from '../components/CoverNums'; 
+import CoverNums from '../components/CoverNums';
 import NavBar from '../components/navigationBar';
 
 export default function BudgetScreen({ navigation }) {
@@ -13,6 +13,18 @@ export default function BudgetScreen({ navigation }) {
   const [newItem, setNewItem] = useState({ name: '', qty: '', price: '' }); // State for new item
   const [maxBudget, setMaxBudget] = useState(0);
   const [totalValue, setTotalValue] = useState(0);
+  const [budgets, setBudgets] = useState([]); // State to store all budgets
+
+  const saveBudget = () => {
+    const newBudget = {
+      id: budgets.length + 1,
+      items,
+      maxBudget,
+      totalValue,
+    };
+    setBudgets([...budgets, newBudget]);
+    navigation.navigate('BudgetListScreen', { budgets: [...budgets, newBudget] });
+  };
 
   // Calculate available balance
   const availableBalance = maxBudget - totalValue;
@@ -41,27 +53,29 @@ export default function BudgetScreen({ navigation }) {
       "Are you sure you want to delete this item?",
       [
         { text: "Cancel", style: "cancel" },
-        { text: "OK", onPress: () => {
-          const filteredItems = items.filter(item => item.id !== id);
-          const deletedItem = items.find(item => item.id === id);
-          setItems(filteredItems);
-          setTotalValue(totalValue - deletedItem.total); // Update total value
-        }}
+        {
+          text: "OK", onPress: () => {
+            const filteredItems = items.filter(item => item.id !== id);
+            const deletedItem = items.find(item => item.id === id);
+            setItems(filteredItems);
+            setTotalValue(totalValue - deletedItem.total); // Update total value
+          }
+        }
       ]
     );
   };
 
   // Render each item with 'name', 'QTY', 'Total'
   const renderItem = ({ item }) => (
-    <TouchableOpacity onPress={() => {}}>
+    <TouchableOpacity onPress={() => { }}>
       <View style={styles.item}>
         <Text style={styles.col1}>{item.name}</Text>
         <Text style={styles.col2}>{item.qty}</Text>
         <Text style={styles.col3}>{item.total.toFixed(2)}</Text>
         <TouchableOpacity style={styles.col4} name="delete" color="red" onPress={() => deleteItem(item.id)}>
-          <Image  source={require('../../assets/Delete_icon.png')} 
-          style={{width:25, height:25}}
-           />
+          <Image source={require('../../assets/Delete_icon.png')}
+            style={{ width: 25, height: 25 }}
+          />
         </TouchableOpacity>
       </View>
     </TouchableOpacity>
@@ -72,20 +86,23 @@ export default function BudgetScreen({ navigation }) {
       <HeaderWithIcon title="Budget Planner"
         MoveTo='Dashboard'
         navigation={navigation} />
-
+      {/*Save user budget as a list to be displayed in the budgetlist screen*/}
+      <TouchableOpacity style={styles.saveIcon} onPress={saveBudget}>
+        <Image source={require('../../assets/save.png')} style={styles.iconImage} />
+      </TouchableOpacity>
       {/* Ribbon Section */}
       <View style={styles.ribbonContainer}>
-        <View style={{padding:15}}>
+        <View style={{ padding: 15 }}>
           <Title2>Amount</Title2>
           <CoverNums >{totalValue}</CoverNums>
-          <View style={{marginTop:15}}>
+          <View style={{ marginTop: 15 }}>
             <Title3>No of Items</Title3>
             <Text>{items.length}</Text>
           </View>
-          
+
         </View>
         <View>
-          
+
         </View>
         <View style={styles.budgetColumn}>
           <Title3>Current Budget</Title3>
@@ -195,7 +212,7 @@ const styles = StyleSheet.create({
     resizeMode: 'cover',
     height: 180,
     width: '100%',
-    backgroundColor: '#D9D9D9', 
+    backgroundColor: '#D9D9D9',
     marginBottom: 20,
   },
   budgetColumn: {
@@ -220,8 +237,8 @@ const styles = StyleSheet.create({
     right: 20,
   },
   iconadd: {
-    width: 54, 
-    height: 54, 
+    width: 54,
+    height: 54,
     marginBottom: 50,
   },
   modalView: {
@@ -258,5 +275,13 @@ const styles = StyleSheet.create({
     color: 'white',
     fontSize: 16,
   },
-
+  saveIcon: {
+    position: 'absolute',
+    top: 15,
+    right: 15,
+  },
+  iconImage: {
+    width: 30,
+    height: 30,
+  },
 });
