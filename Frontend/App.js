@@ -13,42 +13,43 @@ import InventoryOutOFStock from './src/screens/Inventory_OutOfStock';
 import ItemList from './src/screens/ItemList';
 import ItemDetail from './src/screens/ItemDetail';
 import BudgetScreen from './src/screens/BudgetPlanner';
+import BudgetListScreen from './src/screens/BudgetListScreen';
 import FAQScreen from './src/screens/FAQ';
 import NotificationScreen from './src/screens/Notification';
 import CamaraScreen from './src/screens/Camara';
 
 const stack = createNativeStackNavigator();
-const App=()=> {
+const App = () => {
   return (
-  <>
-  <NavigationContainer>
-    <stack.Navigator initialRouteName="Welcome">
-      <stack.Screen  name={'Welcome'} component={LandingPage} options={{ headerShown: false }}/>
-      <stack.Screen  name={'SignUp'} component={SignInScreen} options={{ headerShown: false }}/>
-      <stack.Screen  name={'Login'} component={LoginScreen} options={{ headerShown: false }}/>
+    <>
+      <NavigationContainer>
+        <stack.Navigator initialRouteName="Welcome">
+          <stack.Screen name={'Welcome'} component={LandingPage} options={{ headerShown: false }} />
+          <stack.Screen name={'SignUp'} component={SignInScreen} options={{ headerShown: false }} />
+          <stack.Screen name={'Login'} component={LoginScreen} options={{ headerShown: false }} />
 
-      <stack.Screen  name={'FogotPassword'} component={FogotPasswordSC} options={{ headerShown: false }}/>
-      <stack.Screen  name={'UserProfile'} component={UserAccount} options={{ headerShown: false }}/>
-      <stack.Screen  name={'Dashboard'} component={Dashboard} options={{ headerShown: false }}/>
+          <stack.Screen name={'FogotPassword'} component={FogotPasswordSC} options={{ headerShown: false }} />
+          <stack.Screen name={'UserProfile'} component={UserAccount} options={{ headerShown: false }} />
+          <stack.Screen name={'Dashboard'} component={Dashboard} options={{ headerShown: false }} />
 
 
-      <stack.Screen name={'InventoryAvailable'} component={InventoryScreen} options={{ headerShown: false }}/>
-      <stack.Screen name={'InventoryExpired'} component={InventoryExpired} options={{ headerShown: false }}/>
-      <stack.Screen name={'InventoryOutOfStock'} component={InventoryOutOFStock} options={{ headerShown: false }} />
+          <stack.Screen name={'InventoryAvailable'} component={InventoryScreen} options={{ headerShown: false }} />
+          <stack.Screen name={'InventoryExpired'} component={InventoryExpired} options={{ headerShown: false }} />
+          <stack.Screen name={'InventoryOutOfStock'} component={InventoryOutOFStock} options={{ headerShown: false }} />
 
-      <stack.Screen name={'ItemList'} component={ItemList} options={{ headerShown: false }}/>
-      <stack.Screen name={'ItemDetail'} component={ItemDetail} options={{ headerShown: false }}/>
-      <stack.Screen name={'Budget'} component={BudgetScreen} options={{ headerShown: false }}/>
+          <stack.Screen name={'ItemList'} component={ItemList} options={{ headerShown: false }} />
+          <stack.Screen name={'ItemDetail'} component={ItemDetail} options={{ headerShown: false }} />
+          <stack.Screen name={'Budget'} component={BudgetScreen} options={{ headerShown: false }} />
+          <stack.Screen name={'BudgetListScreen'} component={BudgetListScreen} options={{ headerShown: true }} />
 
-      <stack.Screen name={'FAQ'} component={FAQScreen} options={{ headerShown: false }}/>
+          <stack.Screen name={'FAQ'} component={FAQScreen} options={{ headerShown: false }} />
 
-      <stack.Screen name={'Notification'} component={NotificationScreen} options={{ headerShown: false }}/>
-      
-      <stack.Screen name={'Camara'} component={CamaraScreen} options={{ headerShown: true }}/>
+          <stack.Screen name={'Notification'} component={NotificationScreen} options={{ headerShown: false }} />
 
-    </stack.Navigator>
-  </NavigationContainer>
-  </>
+          <stack.Screen name={'Camara'} component={CamaraScreen} options={{ headerShown: true }} />
+        </stack.Navigator>
+      </NavigationContainer>
+    </>
   );
 };
 
