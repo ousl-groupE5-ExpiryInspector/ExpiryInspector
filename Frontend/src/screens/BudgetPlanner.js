@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, FlatList, StyleSheet, TouchableOpacity, Alert, Modal, TextInput, Image } from 'react-native';
 import BackgroundFlex from '../components/BackgroundFlex';
 import HeaderWithIcon from '../components/HeaderWithIcon';
@@ -14,16 +14,39 @@ export default function BudgetScreen({ navigation }) {
   const [maxBudget, setMaxBudget] = useState(0);
   const [totalValue, setTotalValue] = useState(0);
   const [budgets, setBudgets] = useState([]); // State to store all budgets
+  const [isBudgetSaved, setIsBudgetSaved] = useState(false); // State to check if budget is saved
+  const [previousMaxBudget, setPreviousMaxBudget] = useState(0); // State to store previous max budget
+
+  useEffect(() => {
+    if (previousMaxBudget !== 0 && previousMaxBudget !== maxBudget) {
+      setIsBudgetSaved(false);
+      setTotalValue(0); // Reset total value
+      setItems([]); // Clear items
+    }
+  }, [maxBudget]);
 
   const saveBudget = () => {
-    const newBudget = {
-      id: budgets.length + 1,
-      items,
-      maxBudget,
-      totalValue,
-    };
-    setBudgets([...budgets, newBudget]);
-    navigation.navigate('BudgetListScreen', { budgets: [...budgets, newBudget] });
+    if (items.length > 0 && totalValue > 0 && !isBudgetSaved) {
+      const newBudget = {
+        id: budgets.length + 1,
+        items,
+        maxBudget,
+        totalValue,
+        itemCount: items.length,
+      };
+      setBudgets([...budgets, newBudget]);
+      setIsBudgetSaved(true);
+      setPreviousMaxBudget(maxBudget);
+      navigation.navigate('BudgetListScreen', { budgets: [...budgets, newBudget] });
+    } else if (!isBudgetSaved) {
+      Alert.alert('Alert', 'Please create your budget before saving.');
+    } else {
+      const updatedBudgets = budgets.map(budget => 
+        budget.id === budgets.length ? { ...budget, items, maxBudget, totalValue, itemCount: items.length } : budget
+      );
+      setBudgets(updatedBudgets);
+      navigation.navigate('BudgetListScreen', { budgets: updatedBudgets });
+    }
   };
 
   // Calculate available balance
@@ -59,6 +82,18 @@ export default function BudgetScreen({ navigation }) {
             const deletedItem = items.find(item => item.id === id);
             setItems(filteredItems);
             setTotalValue(totalValue - deletedItem.total); // Update total value
+            if (filteredItems.length === 0) {
+              const updatedBudgets = budgets.filter(budget => budget.id !== budgets.length);
+              setBudgets(updatedBudgets);
+              setIsBudgetSaved(false);
+              navigation.navigate('BudgetListScreen', { budgets: updatedBudgets });
+            } else if (isBudgetSaved) {
+              const updatedBudgets = budgets.map(budget => 
+                budget.id === budgets.length ? { ...budget, items: filteredItems, maxBudget, totalValue: totalValue - deletedItem.total, itemCount: filteredItems.length } : budget
+              );
+              setBudgets(updatedBudgets);
+              navigation.navigate('BudgetListScreen', { budgets: updatedBudgets });
+            }
           }
         }
       ]
@@ -277,8 +312,8 @@ const styles = StyleSheet.create({
   },
   saveIcon: {
     position: 'absolute',
-    top: 15,
-    right: 15,
+    top: 18,
+    right: 20,
   },
   iconImage: {
     width: 30,
