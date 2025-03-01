@@ -25,8 +25,9 @@ export default function BudgetScreen({ navigation }) {
     }
   }, [maxBudget]);
 
+  // Save budget to the list
   const saveBudget = () => {
-    if (items.length > 0 && totalValue > 0 && !isBudgetSaved) {
+    if (items.length > 0 && totalValue > 0 && !isBudgetSaved) {    // Check if there are items and total value is greater than 0
       const newBudget = {
         id: budgets.length + 1,
         items,
@@ -34,18 +35,18 @@ export default function BudgetScreen({ navigation }) {
         totalValue,
         itemCount: items.length,
       };
-      setBudgets([...budgets, newBudget]);
+      setBudgets([...budgets, newBudget]); // Add new budget to the list
       setIsBudgetSaved(true);
       setPreviousMaxBudget(maxBudget);
       navigation.navigate('BudgetListScreen', { budgets: [...budgets, newBudget] });
     } else if (!isBudgetSaved) {
-      Alert.alert('Alert', 'Please create your budget before saving.');
+      Alert.alert('Alert', 'Please create your budget before saving.');  // Alert if no budget is created
     } else {
-      const updatedBudgets = budgets.map(budget => 
-        budget.id === budgets.length ? { ...budget, items, maxBudget, totalValue, itemCount: items.length } : budget
+      const updatedBudgets = budgets.map(budget =>
+        budget.id === budgets.length ? { ...budget, items, maxBudget, totalValue, itemCount: items.length } : budget  // Update the budget
       );
       setBudgets(updatedBudgets);
-      navigation.navigate('BudgetListScreen', { budgets: updatedBudgets });
+      navigation.navigate('BudgetListScreen', { budgets: updatedBudgets }); // Navigate to the budget list screen
     }
   };
 
@@ -88,7 +89,7 @@ export default function BudgetScreen({ navigation }) {
               setIsBudgetSaved(false);
               navigation.navigate('BudgetListScreen', { budgets: updatedBudgets });
             } else if (isBudgetSaved) {
-              const updatedBudgets = budgets.map(budget => 
+              const updatedBudgets = budgets.map(budget =>
                 budget.id === budgets.length ? { ...budget, items: filteredItems, maxBudget, totalValue: totalValue - deletedItem.total, itemCount: filteredItems.length } : budget
               );
               setBudgets(updatedBudgets);
@@ -121,10 +122,12 @@ export default function BudgetScreen({ navigation }) {
       <HeaderWithIcon title="Budget Planner"
         MoveTo='Dashboard'
         navigation={navigation} />
+
       {/*Save user budget as a list to be displayed in the budgetlist screen*/}
       <TouchableOpacity style={styles.saveIcon} onPress={saveBudget}>
         <Image source={require('../../assets/save.png')} style={styles.iconImage} />
       </TouchableOpacity>
+
       {/* Ribbon Section */}
       <View style={styles.ribbonContainer}>
         <View style={{ padding: 15 }}>
@@ -134,7 +137,6 @@ export default function BudgetScreen({ navigation }) {
             <Title3>No of Items</Title3>
             <Text>{items.length}</Text>
           </View>
-
         </View>
         <View>
 
