@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, FlatList, StyleSheet, TouchableOpacity, Alert, Modal, TextInput, Image } from 'react-native';
+import firestore from '@react-native-firebase/firestore';
+import auth from '@react-native-firebase/auth';
 import BackgroundFlex from '../components/BackgroundFlex';
 import HeaderWithIcon from '../components/HeaderWithIcon';
 import Title3 from '../components/Title3';
@@ -233,10 +235,20 @@ const styles = StyleSheet.create({
     paddingLeft: 15,
     marginBottom: 15,
   },
-  col1: { flex: 4, fontWeight: 'bold' },
-  col2: { flex: 2 },
-  col3: { flex: 3 },
-  col4: { flex: 1 },
+  col1: {
+    flex: 4,
+    fontWeight: 'bold'
+  },
+  col2: {
+    flex: 2
+  },
+  col3: {
+    flex:
+      3
+  },
+  col4: {
+    flex: 1
+  },
 
   listContainer: {
     paddingHorizontal: 10,

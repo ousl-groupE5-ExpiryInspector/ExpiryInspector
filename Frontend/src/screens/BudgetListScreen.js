@@ -1,8 +1,12 @@
 import React, { useEffect, useState } from 'react';
+import firestore from '@react-native-firebase/firestore';
+import auth from '@react-native-firebase/auth';
 import { View, Text, FlatList, StyleSheet, TouchableOpacity, Alert, Image } from 'react-native';
 import BackgroundFlex from '../components/BackgroundFlex';
 import HeaderWithIcon from '../components/HeaderWithIcon';
 import NavBar from '../components/navigationBar';
+
+
 
 export default function BudgetListScreen({ route, navigation }) {
   const [budgets, setBudgets] = useState(route.params.budgets || []);
@@ -103,7 +107,7 @@ const styles = StyleSheet.create({
   },
   deleteIcon: {
     padding: 40,
-    
+
   },
   iconImage: {
     width: 34,

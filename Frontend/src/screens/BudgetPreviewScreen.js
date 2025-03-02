@@ -62,15 +62,18 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     height: 50,
   },
-  col1: { 
-    flex: 4, 
-    fontWeight: 'bold' 
+  col1: {
+    flex: 4,
+    fontWeight: 'bold',
+    color: '#060606',
   },
   col2: {
-     flex: 2 
-    },
-  col3: { 
-    flex: 3 
+    flex: 2,
+    color: '#060606',
+  },
+  col3: {
+    flex: 3,
+    color: '#060606',
   },
   listContainer: {
     paddingHorizontal: 10,
