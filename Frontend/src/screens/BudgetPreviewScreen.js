@@ -105,14 +105,16 @@ const styles = StyleSheet.create({
     color: '#060606',
   },
   addButton: {
-    backgroundColor: '#28a745',
-    padding: 10,
+    backgroundColor: 'black',
+    padding: 15,
     marginTop: 10,
-    borderRadius: 5,
+    marginBottom: 40,
+    borderRadius: 7,
     alignItems: 'center',
   },
   buttonText: {
     color: 'white',
     fontSize: 16,
+    fontWeight: 'bold',
   },
 });
