@@ -112,6 +112,7 @@ export default function UserAccount({ navigation }) {
       console.error('❌ Error logging out:', error);
       Alert.alert('Error', 'Failed to log out.');
     }
+    navigation.navigate('Login');
   };
 
   const pickImage = () => {
