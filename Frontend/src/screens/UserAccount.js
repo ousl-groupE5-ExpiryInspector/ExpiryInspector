@@ -119,7 +119,7 @@ export default function UserAccount({ navigation }) {
     launchImageLibrary({ mediaType: 'photo', quality: 1, includeBase64: true }, response => {
       if (response.assets && response.assets.length > 0) {
         const base64Image = `data:image/jpeg;base64,${response.assets[0].base64}`;
-        console.log('📷 Base64 Image Selected');
+        console.log(' Base64 Image Selected');
         setProfilePicture(base64Image);
         saveImageToFirestore(base64Image);
       }
@@ -157,9 +157,6 @@ export default function UserAccount({ navigation }) {
               { uri: profilePicture } : 
               require('../../assets/userAccount_pic.png')} 
                 style={styles.userAccountImg} />
-
-              
-
             </TouchableOpacity>
 
             <View style={styles.infoContainer}>
