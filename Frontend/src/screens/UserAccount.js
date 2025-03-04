@@ -173,6 +173,9 @@ export default function UserAccount({ navigation }) {
             <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
               <Text style={styles.buttonText}>Logout</Text>
             </TouchableOpacity>
+            <TouchableOpacity style={styles.deleteButton}>
+              <Text style={styles.buttonText}>Delete account</Text>
+            </TouchableOpacity>
           </>
         ) : (
           <Text>No user logged in</Text>
