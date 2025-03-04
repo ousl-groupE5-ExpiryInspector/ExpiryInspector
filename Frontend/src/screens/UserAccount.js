@@ -152,11 +152,14 @@ export default function UserAccount({ navigation }) {
         ) : userData ? (
           <>
             <TouchableOpacity onPress={pickImage}>
-              {profilePicture ? (
-                <Image source={{ uri: profilePicture }} style={styles.userAccountImg} />
-              ) : (
-                <Image source={require('../../assets/userAccount_pic.png')} style={styles.userAccountImg} />
-              )}
+            <Image 
+              source={profilePicture && profilePicture.trim() !== "" ? 
+              { uri: profilePicture } : 
+              require('../../assets/userAccount_pic.png')} 
+                style={styles.userAccountImg} />
+
+              
+
             </TouchableOpacity>
 
             <View style={styles.infoContainer}>
@@ -196,8 +199,8 @@ const styles = StyleSheet.create({
   },
   userAccountImg: {
     width: 200,
-    height: 200,
-    borderRadius: 75,
+    height: 201,
+    borderRadius: 100,
     resizeMode: 'contain',
     marginBottom: 30,
   },
