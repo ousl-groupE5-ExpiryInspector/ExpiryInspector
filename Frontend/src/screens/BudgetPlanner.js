@@ -28,29 +28,69 @@ export default function BudgetScreen({ navigation }) {
   }, [maxBudget]);
 
   // Save budget to the list
-  const saveBudget = () => {
-    if (items.length > 0 && totalValue > 0 && !isBudgetSaved) {    // Check if there are items and total value is greater than 0
-      const newBudget = {
-        id: budgets.length + 1,
-        items,
-        maxBudget,
-        totalValue,
-        itemCount: items.length,
-      };
-      setBudgets([...budgets, newBudget]); // Add new budget to the list
-      setIsBudgetSaved(true);
-      setPreviousMaxBudget(maxBudget);
-      navigation.navigate('BudgetListScreen', { budgets: [...budgets, newBudget] });
+  const saveBudget = async () => {
+    if (items.length > 0 && totalValue > 0 && !isBudgetSaved) {
+      try {
+        const user = auth().currentUser;
+        if (!user) {
+          Alert.alert('Error', 'User not authenticated');
+          return;
+        }
+        
+        const budgetRef = firestore().collection('budgets').doc();
+        const newBudget = {
+          id: budgetRef.id, // Firestore auto-generated ID
+          userId: user.uid,
+          items,
+          maxBudget,
+          totalValue,
+          itemCount: items.length,
+          createdAt: firestore.FieldValue.serverTimestamp()
+        };
+        
+        await budgetRef.set(newBudget);
+        setBudgets([...budgets, newBudget]); // Add new budget to state
+        setIsBudgetSaved(true);
+        setPreviousMaxBudget(maxBudget);
+        navigation.navigate('BudgetListScreen', { budgets: [...budgets, newBudget] });
+      } catch (error) {
+        Alert.alert('Error', 'Failed to save budget');
+        console.error(error);
+      }
     } else if (!isBudgetSaved) {
-      Alert.alert('Alert', 'Please create your budget before saving.');  // Alert if no budget is created
+      Alert.alert('Alert', 'Please create your budget before saving.');
     } else {
-      const updatedBudgets = budgets.map(budget =>
-        budget.id === budgets.length ? { ...budget, items, maxBudget, totalValue, itemCount: items.length } : budget  // Update the budget
-      );
-      setBudgets(updatedBudgets);
-      navigation.navigate('BudgetListScreen', { budgets: updatedBudgets }); // Navigate to the budget list screen
+      try {
+        const user = auth().currentUser;
+        if (!user) {
+          Alert.alert('Error', 'User not authenticated');
+          return;
+        }
+        
+        const latestBudget = budgets[budgets.length - 1];
+        const updatedBudget = {
+          ...latestBudget,
+          items,
+          maxBudget,
+          totalValue,
+          itemCount: items.length,
+          updatedAt: firestore.FieldValue.serverTimestamp()
+        };
+        
+        await firestore().collection('budgets').doc(latestBudget.id).update(updatedBudget);
+        
+        const updatedBudgets = budgets.map(budget =>
+          budget.id === latestBudget.id ? updatedBudget : budget
+        );
+        setBudgets(updatedBudgets);
+        navigation.navigate('BudgetListScreen', { budgets: updatedBudgets });
+      } catch (error) {
+        Alert.alert('Error', 'Failed to update budget');
+        console.error(error);
+      }
     }
   };
+  
 
   // Calculate available balance
   const availableBalance = maxBudget - totalValue;
