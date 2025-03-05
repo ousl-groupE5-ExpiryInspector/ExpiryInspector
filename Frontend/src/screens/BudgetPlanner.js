@@ -1,13 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, FlatList, StyleSheet, TouchableOpacity, Alert, Modal, TextInput, Image } from 'react-native';
-import firestore from '@react-native-firebase/firestore';
-import auth from '@react-native-firebase/auth';
 import BackgroundFlex from '../components/BackgroundFlex';
 import HeaderWithIcon from '../components/HeaderWithIcon';
 import Title3 from '../components/Title3';
 import Title2 from '../components/Title2';
 import CoverNums from '../components/CoverNums';
 import NavBar from '../components/navigationBar';
+import {getApps, getApp } from 'firebase/app';
+import { getAuth, initializeAuth, getReactNativePersistence } from 'firebase/auth';
+import { getFirestore } from 'firebase/firestore';
+import ReactNativeAsyncStorage from '@react-native-async-storage/async-storage';
+import { initializeApp } from 'firebase/app';
+import { getStorage } from 'firebase/storage';
 
 export default function BudgetScreen({ navigation }) {
   const [items, setItems] = useState([]);
