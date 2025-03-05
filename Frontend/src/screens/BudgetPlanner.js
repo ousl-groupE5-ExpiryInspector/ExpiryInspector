@@ -6,12 +6,9 @@ import Title3 from '../components/Title3';
 import Title2 from '../components/Title2';
 import CoverNums from '../components/CoverNums';
 import NavBar from '../components/navigationBar';
-import {getApps, getApp } from 'firebase/app';
-import { getAuth, initializeAuth, getReactNativePersistence } from 'firebase/auth';
-import { getFirestore } from 'firebase/firestore';
-import ReactNativeAsyncStorage from '@react-native-async-storage/async-storage';
-import { initializeApp } from 'firebase/app';
-import { getStorage } from 'firebase/storage';
+import firestore from '@react-native-firebase/firestore';
+import auth from '@react-native-firebase/auth';
+
 
 export default function BudgetScreen({ navigation }) {
   const [items, setItems] = useState([]);
@@ -24,6 +21,31 @@ export default function BudgetScreen({ navigation }) {
   const [previousMaxBudget, setPreviousMaxBudget] = useState(0); // State to store previous max budget
 
   useEffect(() => {
+    const fetchBudgets = async () => {
+      const userId = getUserId();
+      if (!userId) return;
+
+      try {
+        const snapshot = await firestore()
+          .collection('budgets')
+          .where('userId', '==', userId)
+          .get();
+
+        const fetchedBudgets = snapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data(),
+        }));
+
+        setBudgets(fetchedBudgets);
+      } catch (error) {
+        console.error("Error fetching budgets:", error);
+      }
+    };
+
+    fetchBudgets();
+  }, []);
+
+  useEffect(() => {
     if (previousMaxBudget !== 0 && previousMaxBudget !== maxBudget) {
       setIsBudgetSaved(false);
       setTotalValue(0); // Reset total value
@@ -32,27 +54,45 @@ export default function BudgetScreen({ navigation }) {
   }, [maxBudget]);
 
   // Save budget to the list
-  const saveBudget = () => {
-    if (items.length > 0 && totalValue > 0 && !isBudgetSaved) {    // Check if there are items and total value is greater than 0
-      const newBudget = {
-        id: budgets.length + 1,
-        items,
-        maxBudget,
-        totalValue,
-        itemCount: items.length,
-      };
-      setBudgets([...budgets, newBudget]); // Add new budget to the list
-      setIsBudgetSaved(true);
-      setPreviousMaxBudget(maxBudget);
-      navigation.navigate('BudgetListScreen', { budgets: [...budgets, newBudget] });
-    } else if (!isBudgetSaved) {
-      Alert.alert('Alert', 'Please create your budget before saving.');  // Alert if no budget is created
-    } else {
-      const updatedBudgets = budgets.map(budget =>
-        budget.id === budgets.length ? { ...budget, items, maxBudget, totalValue, itemCount: items.length } : budget  // Update the budget
-      );
-      setBudgets(updatedBudgets);
-      navigation.navigate('BudgetListScreen', { budgets: updatedBudgets }); // Navigate to the budget list screen
+  const saveBudget = async () => {
+    const userId = auth().currentUser?.uid; // Get current authenticated user ID
+
+    // Check if the user is authenticated
+    if (!userId) {
+      Alert.alert("Error", "You must be logged in to save a budget.");
+      return;
+    }
+
+    const budgetData = {
+      userId,           // Store userId with each budget
+      items,            // Items list
+      maxBudget,        // Max budget
+      totalValue,       // Total value of the items
+      itemCount: items.length, // Number of items
+      createdAt: new Date(),  // Add timestamp for the creation
+    };
+
+    try {
+      if (!isBudgetSaved) {
+        // Save the new budget to Firestore
+        await firestore().collection('budgets').add(budgetData);
+        setIsBudgetSaved(true);  // Mark the budget as saved
+        setBudgets([...budgets, budgetData]); // Add to local state
+      } else {
+        // If budget is already saved, update the existing one
+        const lastBudget = budgets[budgets.length - 1]; // Get last budget
+        await firestore().collection('budgets').doc(lastBudget.id).update(budgetData);
+        const updatedBudgets = budgets.map(budget =>
+          budget.id === lastBudget.id ? { ...budget, ...budgetData } : budget
+        );
+        setBudgets(updatedBudgets);  // Update local state
+      }
+
+      // Navigate to the BudgetListScreen with updated budgets
+      navigation.navigate('BudgetListScreen', { budgets });
+    } catch (error) {
+      console.error("Error saving/updating budget:", error);
+      Alert.alert("Error", "Failed to save budget.");
     }
   };
 
@@ -75,37 +115,80 @@ export default function BudgetScreen({ navigation }) {
       Alert.alert('Error', 'Please fill in all fields');
     }
   };
+  const updateBudget = async (budgetId) => {
+    const userId = getUserId();
+    if (!userId) return;
 
-  // Delete selected item
-  const deleteItem = (id) => {
+    try {
+      await firestore().collection('budgets').doc(budgetId).update({
+        items,
+        maxBudget,
+        totalValue,
+        itemCount: items.length,
+        updatedAt: firestore.FieldValue.serverTimestamp(),
+      });
+
+      const updatedBudgets = budgets.map(budget =>
+        budget.id === budgetId ? { ...budget, items, maxBudget, totalValue, itemCount: items.length } : budget
+      );
+      setBudgets(updatedBudgets);
+      navigation.navigate('BudgetListScreen', { budgets: updatedBudgets });
+
+    } catch (error) {
+      console.error("Error updating budget:", error);
+    }
+  };
+
+  const deleteBudget = async (budgetId) => {
     Alert.alert(
-      "Delete Item",
-      "Are you sure you want to delete this item?",
+      "Delete Budget",
+      "Are you sure you want to delete this budget?",
       [
         { text: "Cancel", style: "cancel" },
         {
-          text: "OK", onPress: () => {
-            const filteredItems = items.filter(item => item.id !== id);
-            const deletedItem = items.find(item => item.id === id);
-            setItems(filteredItems);
-            setTotalValue(totalValue - deletedItem.total); // Update total value
-            if (filteredItems.length === 0) {
-              const updatedBudgets = budgets.filter(budget => budget.id !== budgets.length);
+          text: "OK", onPress: async () => {
+            try {
+              await firestore().collection('budgets').doc(budgetId).delete();
+
+              const updatedBudgets = budgets.filter(budget => budget.id !== budgetId);
               setBudgets(updatedBudgets);
               setIsBudgetSaved(false);
               navigation.navigate('BudgetListScreen', { budgets: updatedBudgets });
-            } else if (isBudgetSaved) {
-              const updatedBudgets = budgets.map(budget =>
-                budget.id === budgets.length ? { ...budget, items: filteredItems, maxBudget, totalValue: totalValue - deletedItem.total, itemCount: filteredItems.length } : budget
-              );
-              setBudgets(updatedBudgets);
-              navigation.navigate('BudgetListScreen', { budgets: updatedBudgets });
+
+            } catch (error) {
+              console.error("Error deleting budget:", error);
             }
           }
         }
       ]
     );
   };
+
+  // Delete selected item
+  const deleteItem = async (id) => {
+    Alert.alert(
+      "Delete Item",
+      "Are you sure you want to delete this item?",
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "OK", onPress: async () => {
+            const filteredItems = items.filter(item => item.id !== id);
+            const deletedItem = items.find(item => item.id === id);
+            setItems(filteredItems);
+            setTotalValue(totalValue - deletedItem.total);
+
+            if (filteredItems.length === 0) {
+              deleteBudget(budgets.length); // Delete budget if no items left
+            } else {
+              updateBudget(budgets.length); // Update budget if items exist
+            }
+          }
+        }
+      ]
+    );
+  };
+
 
   // Render each item with 'name', 'QTY', 'Total'
   const renderItem = ({ item }) => (

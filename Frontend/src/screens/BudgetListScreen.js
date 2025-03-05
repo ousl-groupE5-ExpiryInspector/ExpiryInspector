@@ -6,10 +6,24 @@ import BackgroundFlex from '../components/BackgroundFlex';
 import HeaderWithIcon from '../components/HeaderWithIcon';
 import NavBar from '../components/navigationBar';
 
-
+import { collection, deleteDoc, doc, onSnapshot, query, where } from 'firebase/firestore';
 
 export default function BudgetListScreen({ route, navigation }) {
   const [budgets, setBudgets] = useState(route.params.budgets || []);
+  const [userId, setUserId] = useState(null);
+
+  useEffect(() => {
+    const checkUser = async () => {
+      const user = auth().currentUser;
+      if (user) {
+        setUserId(user.uid);
+        fetchUserBudgets(user.uid);
+      } else {
+        setUserId(null);
+      }
+    };
+    checkUser();
+  }, []);
 
   useEffect(() => {
     if (route.params?.budgets) {
@@ -17,17 +31,35 @@ export default function BudgetListScreen({ route, navigation }) {
     }
   }, [route.params?.budgets]);
 
+  const fetchUserBudgets = (uid) => {
+    const q = query(collection(firestore, 'budgets'), where('userId', '==', uid));
+    const unsubscribe = onSnapshot(q, (querySnapshot) => {
+      const budgetsData = [];
+      querySnapshot.forEach((doc) => {
+        budgetsData.push({ id: doc.id, ...doc.data() });
+      });
+      setBudgets(budgetsData);
+    });
+    return unsubscribe;
+  };
+
   // Delete budget function
-  const deleteBudget = (id) => {
+  const deleteBudget = async (id) => {
     Alert.alert(
       "Delete Budget",
       "Are you sure you want to delete this budget?",
       [
         { text: "Cancel", style: "cancel" },
         {
-          text: "OK", onPress: () => {
-            const updatedBudgets = budgets.filter(budget => budget.id !== id);
-            setBudgets(updatedBudgets);
+          text: "OK", onPress: async () => {
+            try {
+              await deleteDoc(doc(firestore, 'budgets', id));
+              const updatedBudgets = budgets.filter(budget => budget.id !== id);
+              setBudgets(updatedBudgets);
+            } catch (error) {
+              console.error('Error deleting budget:', error);
+              Alert.alert('Error', `An error occurred while deleting the budget: ${error.message}`);
+            }
           }
         }
       ]
@@ -107,7 +139,6 @@ const styles = StyleSheet.create({
   },
   deleteIcon: {
     padding: 40,
-
   },
   iconImage: {
     width: 34,
