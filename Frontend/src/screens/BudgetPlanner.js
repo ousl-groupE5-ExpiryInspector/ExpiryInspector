@@ -65,7 +65,7 @@ export default function BudgetScreen({ navigation }) {
           Alert.alert('Error', 'User not authenticated');
           return;
         }
-        
+
         const budgetRef = firestore().collection('budgets').doc();
         const newBudget = {
           id: budgetRef.id, // Firestore auto-generated ID
@@ -76,7 +76,7 @@ export default function BudgetScreen({ navigation }) {
           itemCount: items.length,
           createdAt: firestore.FieldValue.serverTimestamp()
         };
-        
+
         await budgetRef.set(newBudget);
         setBudgets([...budgets, newBudget]); // Add new budget to state
         setIsBudgetSaved(true);
@@ -95,7 +95,7 @@ export default function BudgetScreen({ navigation }) {
           Alert.alert('Error', 'User not authenticated');
           return;
         }
-        
+
         const latestBudget = budgets[budgets.length - 1];
         const updatedBudget = {
           ...latestBudget,
@@ -105,9 +105,9 @@ export default function BudgetScreen({ navigation }) {
           itemCount: items.length,
           updatedAt: firestore.FieldValue.serverTimestamp()
         };
-        
+
         await firestore().collection('budgets').doc(latestBudget.id).update(updatedBudget);
-        
+
         const updatedBudgets = budgets.map(budget =>
           budget.id === latestBudget.id ? updatedBudget : budget
         );
@@ -136,6 +136,8 @@ export default function BudgetScreen({ navigation }) {
       Alert.alert('Error', 'Please fill in all fields');
     }
   };
+
+  // Update budget with new items
   const updateBudget = async (budgetId) => {
     const userId = getUserId();
     if (!userId) return;
@@ -160,30 +162,6 @@ export default function BudgetScreen({ navigation }) {
     }
   };
 
-  const deleteBudget = async (budgetId) => {
-    Alert.alert(
-      "Delete Budget",
-      "Are you sure you want to delete this budget?",
-      [
-        { text: "Cancel", style: "cancel" },
-        {
-          text: "OK", onPress: async () => {
-            try {
-              await firestore().collection('budgets').doc(budgetId).delete();
-
-              const updatedBudgets = budgets.filter(budget => budget.id !== budgetId);
-              setBudgets(updatedBudgets);
-              setIsBudgetSaved(false);
-              navigation.navigate('BudgetListScreen', { budgets: updatedBudgets });
-
-            } catch (error) {
-              console.error("Error deleting budget:", error);
-            }
-          }
-        }
-      ]
-    );
-  };
 
   // Delete selected item
   const deleteItem = async (id) => {
@@ -198,12 +176,6 @@ export default function BudgetScreen({ navigation }) {
             const deletedItem = items.find(item => item.id === id);
             setItems(filteredItems);
             setTotalValue(totalValue - deletedItem.total);
-
-            if (filteredItems.length === 0) {
-              deleteBudget(budgets.length); // Delete budget if no items left
-            } else {
-              updateBudget(budgets.length); // Update budget if items exist
-            }
           }
         }
       ]

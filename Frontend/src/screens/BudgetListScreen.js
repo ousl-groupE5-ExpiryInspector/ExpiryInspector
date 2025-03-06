@@ -6,10 +6,22 @@ import BackgroundFlex from '../components/BackgroundFlex';
 import HeaderWithIcon from '../components/HeaderWithIcon';
 import NavBar from '../components/navigationBar';
 
-
-
 export default function BudgetListScreen({ route, navigation }) {
   const [budgets, setBudgets] = useState(route.params.budgets || []);
+  const [userId, setUserId] = useState(null);
+
+  useEffect(() => {
+    const checkUser = async () => {
+      const user = auth().currentUser;
+      if (user) {
+        setUserId(user.uid);
+        fetchUserBudgets(user.uid);
+      } else {
+        setUserId(null);
+      }
+    };
+    checkUser();
+  }, []);
 
   useEffect(() => {
     if (route.params?.budgets) {
@@ -17,27 +29,71 @@ export default function BudgetListScreen({ route, navigation }) {
     }
   }, [route.params?.budgets]);
 
+  const fetchUserBudgets = (uid) => {
+    const unsubscribe = firestore()
+      .collection('budgets')
+      .where('userId', '==', uid)
+      .onSnapshot((querySnapshot) => {
+        const budgetsData = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        setBudgets(budgetsData);
+      });
+    return unsubscribe;
+  };
+
   // Delete budget function
-  const deleteBudget = (id) => {
+  const deleteBudget = async (id) => {
     Alert.alert(
       "Delete Budget",
       "Are you sure you want to delete this budget?",
       [
         { text: "Cancel", style: "cancel" },
         {
-          text: "OK", onPress: () => {
-            const updatedBudgets = budgets.filter(budget => budget.id !== id);
-            setBudgets(updatedBudgets);
+          text: "OK", onPress: async () => {
+            try {
+              await firestore().collection('budgets').doc(id).delete();
+              setBudgets(prevBudgets => prevBudgets.filter(budget => budget.id !== id));
+            } catch (error) {
+              console.error('Error deleting budget:', error);
+              Alert.alert('Error', `An error occurred while deleting the budget: ${error.message}`);
+            }
           }
         }
       ]
     );
   };
 
+  // Handle budget click: re-add to budget planner and navigate
+  const handleBudgetClick = async (budgetId) => {
+    try {
+      // Get the reference of the budget document by ID
+      const budgetRef = firestore().collection('budgets').doc(budgetId);
+      const budgetSnapshot = await budgetRef.get();
+
+      if (!budgetSnapshot.exists) {
+        Alert.alert('Error', 'Budget not found!');
+        return;
+      }
+
+      // Retrieve budget data
+      const budgetData = budgetSnapshot.data();
+
+      // Add the budget to 'activeBudgets' using a new auto-generated ID
+      const activeBudgetRef = firestore().collection('activeBudgets').doc(); // Auto-generated ID
+      await activeBudgetRef.set({ ...budgetData, originalId: budgetId });
+
+      // Navigate to BudgetPlannerScreen with the added budget details
+      navigation.navigate('BudgetPlannerScreen', { budget: { id: activeBudgetRef.id, ...budgetData } });
+    } catch (error) {
+      console.error('Error adding budget to planner:', error);
+      Alert.alert('Error', `An error occurred: ${error.message}`);
+    }
+  };
+
+
   // Render each budget with its details
   const renderBudget = ({ item }) => (
     <View style={styles.budgetItem}>
-      <TouchableOpacity onPress={() => navigation.navigate('BudgetPreviewScreen', { budget: item })}>
+      <TouchableOpacity onPress={() => handleBudgetClick(item)}>
         <Text style={styles.budgetTitle}>Budget {item.id}</Text>
         <Text style={styles.infoText}>Current Budget: {item.maxBudget}</Text>
         <Text style={styles.infoText}>Total Value: {item.totalValue}</Text>
@@ -106,8 +162,7 @@ const styles = StyleSheet.create({
     color: '#060606',
   },
   deleteIcon: {
-    padding: 40,
-    
+    padding: 20,
   },
   iconImage: {
     width: 34,
