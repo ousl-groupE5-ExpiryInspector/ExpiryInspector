@@ -56,6 +56,70 @@ export default function BudgetScreen({ navigation }) {
   // Calculate available balance
   const availableBalance = maxBudget - totalValue;
 
+  //save
+  const saveBudget = async () => {
+    if (items.length > 0 && totalValue > 0 && !isBudgetSaved) {
+      try {
+        const user = auth().currentUser;
+        if (!user) {
+          Alert.alert('Error', 'User not authenticated');
+          return;
+        }
+        
+        const budgetRef = firestore().collection('budgets').doc();
+        const newBudget = {
+          id: budgetRef.id, // Firestore auto-generated ID
+          userId: user.uid,
+          items,
+          maxBudget,
+          totalValue,
+          itemCount: items.length,
+          createdAt: firestore.FieldValue.serverTimestamp()
+        };
+        
+        await budgetRef.set(newBudget);
+        setBudgets([...budgets, newBudget]); // Add new budget to state
+        setIsBudgetSaved(true);
+        setPreviousMaxBudget(maxBudget);
+        navigation.navigate('BudgetListScreen', { budgets: [...budgets, newBudget] });
+      } catch (error) {
+        Alert.alert('Error', 'Failed to save budget');
+        console.error(error);
+      }
+    } else if (!isBudgetSaved) {
+      Alert.alert('Alert', 'Please create your budget before saving.');
+    } else {
+      try {
+        const user = auth().currentUser;
+        if (!user) {
+          Alert.alert('Error', 'User not authenticated');
+          return;
+        }
+        
+        const latestBudget = budgets[budgets.length - 1];
+        const updatedBudget = {
+          ...latestBudget,
+          items,
+          maxBudget,
+          totalValue,
+          itemCount: items.length,
+          updatedAt: firestore.FieldValue.serverTimestamp()
+        };
+        
+        await firestore().collection('budgets').doc(latestBudget.id).update(updatedBudget);
+        
+        const updatedBudgets = budgets.map(budget =>
+          budget.id === latestBudget.id ? updatedBudget : budget
+        );
+        setBudgets(updatedBudgets);
+        navigation.navigate('BudgetListScreen', { budgets: updatedBudgets });
+      } catch (error) {
+        Alert.alert('Error', 'Failed to update budget');
+        console.error(error);
+      }
+    }
+  };
+
   // Add a new item to the list
   const addItem = () => {
     if (newItem.name && newItem.qty && newItem.price) {
