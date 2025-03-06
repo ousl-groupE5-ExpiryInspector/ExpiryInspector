@@ -53,49 +53,6 @@ export default function BudgetScreen({ navigation }) {
     }
   }, [maxBudget]);
 
-  // Save budget to the list
-  const saveBudget = async () => {
-    const userId = auth().currentUser?.uid; // Get current authenticated user ID
-
-    // Check if the user is authenticated
-    if (!userId) {
-      Alert.alert("Error", "You must be logged in to save a budget.");
-      return;
-    }
-
-    const budgetData = {
-      userId,           // Store userId with each budget
-      items,            // Items list
-      maxBudget,        // Max budget
-      totalValue,       // Total value of the items
-      itemCount: items.length, // Number of items
-      createdAt: new Date(),  // Add timestamp for the creation
-    };
-
-    try {
-      if (!isBudgetSaved) {
-        // Save the new budget to Firestore
-        await firestore().collection('budgets').add(budgetData);
-        setIsBudgetSaved(true);  // Mark the budget as saved
-        setBudgets([...budgets, budgetData]); // Add to local state
-      } else {
-        // If budget is already saved, update the existing one
-        const lastBudget = budgets[budgets.length - 1]; // Get last budget
-        await firestore().collection('budgets').doc(lastBudget.id).update(budgetData);
-        const updatedBudgets = budgets.map(budget =>
-          budget.id === lastBudget.id ? { ...budget, ...budgetData } : budget
-        );
-        setBudgets(updatedBudgets);  // Update local state
-      }
-
-      // Navigate to the BudgetListScreen with updated budgets
-      navigation.navigate('BudgetListScreen', { budgets });
-    } catch (error) {
-      console.error("Error saving/updating budget:", error);
-      Alert.alert("Error", "Failed to save budget.");
-    }
-  };
-
   // Calculate available balance
   const availableBalance = maxBudget - totalValue;
 
