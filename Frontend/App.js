@@ -14,7 +14,6 @@ import ItemList from './src/screens/ItemList';
 import ItemDetail from './src/screens/ItemDetail';
 import BudgetScreen from './src/screens/BudgetPlanner';
 import BudgetListScreen from './src/screens/BudgetListScreen';
-import BudgetPreviewScreen from './src/screens/BudgetPreviewScreen';
 import FAQScreen from './src/screens/FAQ';
 import NotificationScreen from './src/screens/Notification';
 import CamaraScreen from './src/screens/Camara';
@@ -42,9 +41,7 @@ const App = () => {
           <stack.Screen name={'ItemDetail'} component={ItemDetail} options={{ headerShown: false }} />
           <stack.Screen name={'Budget'} component={BudgetScreen} options={{ headerShown: false }} />
           <stack.Screen name={'BudgetListScreen'} component={BudgetListScreen} options={{ headerShown: false }} />
-          <stack.Screen name={'BudgetPreviewScreen'} component={BudgetPreviewScreen} options={{ headerShown: false }} />
-
-
+         
           <stack.Screen name={'FAQ'} component={FAQScreen} options={{ headerShown: false }} />
 
           <stack.Screen name={'Notification'} component={NotificationScreen} options={{ headerShown: false }} />
