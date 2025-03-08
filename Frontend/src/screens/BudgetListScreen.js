@@ -1,15 +1,16 @@
 import React, { useEffect, useState } from 'react';
-import firestore from '@react-native-firebase/firestore';
-import auth from '@react-native-firebase/auth';
 import { View, Text, FlatList, StyleSheet, TouchableOpacity, Alert, Image } from 'react-native';
 import BackgroundFlex from '../components/BackgroundFlex';
 import HeaderWithIcon from '../components/HeaderWithIcon';
 import NavBar from '../components/navigationBar';
+import firestore from '@react-native-firebase/firestore';
+import auth from '@react-native-firebase/auth';
 
 export default function BudgetListScreen({ route, navigation }) {
-  const [budgets, setBudgets] = useState(route.params.budgets || []);
+  const [budgets, setBudgets] = useState(route.params.budgets || []);  // Initialize budgets state with the passed route params
   const [userId, setUserId] = useState(null);
 
+  // Check if the user is logged in and fetch user budgets
   useEffect(() => {
     const checkUser = async () => {
       const user = auth().currentUser;
@@ -23,12 +24,14 @@ export default function BudgetListScreen({ route, navigation }) {
     checkUser();
   }, []);
 
+  // Update budgets state when the route params change
   useEffect(() => {
     if (route.params?.budgets) {
       setBudgets(route.params.budgets);
     }
   }, [route.params?.budgets]);
 
+  // Fetch user budgets from Firestore
   const fetchUserBudgets = (uid) => {
     const unsubscribe = firestore()
       .collection('budgets')
@@ -50,7 +53,7 @@ export default function BudgetListScreen({ route, navigation }) {
         {
           text: "OK", onPress: async () => {
             try {
-              await firestore().collection('budgets').doc(id).delete();
+              await firestore().collection('budgets').doc(id).delete(); // Delete budget from Firestore
               setBudgets(prevBudgets => prevBudgets.filter(budget => budget.id !== id));
             } catch (error) {
               console.error('Error deleting budget:', error);
@@ -62,32 +65,28 @@ export default function BudgetListScreen({ route, navigation }) {
     );
   };
 
-  // Handle budget click: re-add to budget planner and navigate
+  /* Handle budget click: re-add to budget planner and navigate
   const handleBudgetClick = async (budgetId) => {
-    try {
-      // Get the reference of the budget document by ID
-      const budgetRef = firestore().collection('budgets').doc(budgetId);
-      const budgetSnapshot = await budgetRef.get();
+  try {
+    // Get the reference of the budget document by ID
+    const budgetRef = firestore().collection('budgets').doc(budgetId);
+    const budgetSnapshot = await budgetRef.get();
 
-      if (!budgetSnapshot.exists) {
-        Alert.alert('Error', 'Budget not found!');
-        return;
-      }
-
-      // Retrieve budget data
-      const budgetData = budgetSnapshot.data();
-
-      // Add the budget to 'activeBudgets' using a new auto-generated ID
-      const activeBudgetRef = firestore().collection('activeBudgets').doc(); // Auto-generated ID
-      await activeBudgetRef.set({ ...budgetData, originalId: budgetId });
-
-      // Navigate to BudgetPlannerScreen with the added budget details
-      navigation.navigate('BudgetPlannerScreen', { budget: { id: activeBudgetRef.id, ...budgetData } });
-    } catch (error) {
-      console.error('Error adding budget to planner:', error);
-      Alert.alert('Error', `An error occurred: ${error.message}`);
+    if (!budgetSnapshot.exists) {
+      Alert.alert('Error', 'Budget not found!');
+      return;
     }
-  };
+
+    // Retrieve budget data
+    const budgetData = budgetSnapshot.data();
+
+    // Navigate to BudgetPlannerScreen with the budget details
+    navigation.navigate('BudgetPlannerScreen', { budget: { id: budgetId, ...budgetData } });
+  } catch (error) {
+    console.error('Error fetching budget details:', error);
+    Alert.alert('Error', `An error occurred: ${error.message}`);
+  }
+};*/
 
 
   // Render each budget with its details
@@ -113,7 +112,7 @@ export default function BudgetListScreen({ route, navigation }) {
       </View>
       <FlatList
         data={budgets}
-        keyExtractor={(item) => item.id.toString()}
+        keyExtractor={(item) => item.id.toString()}  // Use the budget ID as the key
         renderItem={renderBudget}
         contentContainerStyle={styles.listContainer}
       />
@@ -162,10 +161,10 @@ const styles = StyleSheet.create({
     color: '#060606',
   },
   deleteIcon: {
-    padding: 20,
+    padding: 5,
   },
   iconImage: {
-    width: 34,
-    height: 34,
+    width: 30,
+    height: 30,
   },
 });

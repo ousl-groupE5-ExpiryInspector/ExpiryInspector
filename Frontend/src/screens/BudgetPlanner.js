@@ -9,7 +9,6 @@ import NavBar from '../components/navigationBar';
 import firestore from '@react-native-firebase/firestore';
 import auth from '@react-native-firebase/auth';
 
-
 export default function BudgetScreen({ navigation }) {
   const [items, setItems] = useState([]);
   const [showModal, setShowModal] = useState(false); // State to control modal
@@ -20,13 +19,14 @@ export default function BudgetScreen({ navigation }) {
   const [isBudgetSaved, setIsBudgetSaved] = useState(false); // State to check if budget is saved
   const [previousMaxBudget, setPreviousMaxBudget] = useState(0); // State to store previous max budget
 
+  // Get user ID
   useEffect(() => {
     const fetchBudgets = async () => {
       const userId = getUserId();
       if (!userId) return;
 
       try {
-        const snapshot = await firestore()
+        const snapshot = await firestore()  // Fetch budgets from Firestore
           .collection('budgets')
           .where('userId', '==', userId)
           .get();
@@ -36,7 +36,7 @@ export default function BudgetScreen({ navigation }) {
           ...doc.data(),
         }));
 
-        setBudgets(fetchedBudgets);
+        setBudgets(fetchedBudgets);  // Set budgets state with fetched budgets
       } catch (error) {
         console.error("Error fetching budgets:", error);
       }
@@ -46,7 +46,7 @@ export default function BudgetScreen({ navigation }) {
   }, []);
 
   useEffect(() => {
-    if (previousMaxBudget !== 0 && previousMaxBudget !== maxBudget) {
+    if (previousMaxBudget !== 0 && previousMaxBudget !== maxBudget) {  // Check if max budget has changed
       setIsBudgetSaved(false);
       setTotalValue(0); // Reset total value
       setItems([]); // Clear items
@@ -56,7 +56,7 @@ export default function BudgetScreen({ navigation }) {
   // Calculate available balance
   const availableBalance = maxBudget - totalValue;
 
-  //save
+  //save budget to firestore
   const saveBudget = async () => {
     if (items.length > 0 && totalValue > 0 && !isBudgetSaved) {
       try {
@@ -96,7 +96,7 @@ export default function BudgetScreen({ navigation }) {
           return;
         }
 
-        const latestBudget = budgets[budgets.length - 1];
+        const latestBudget = budgets[budgets.length - 1];  // Get the latest budget
         const updatedBudget = {
           ...latestBudget,
           items,
@@ -106,7 +106,7 @@ export default function BudgetScreen({ navigation }) {
           updatedAt: firestore.FieldValue.serverTimestamp()
         };
 
-        await firestore().collection('budgets').doc(latestBudget.id).update(updatedBudget);
+        await firestore().collection('budgets').doc(latestBudget.id).update(updatedBudget); // Update budget in Firestore
 
         const updatedBudgets = budgets.map(budget =>
           budget.id === latestBudget.id ? updatedBudget : budget
@@ -143,7 +143,7 @@ export default function BudgetScreen({ navigation }) {
     if (!userId) return;
 
     try {
-      await firestore().collection('budgets').doc(budgetId).update({
+      await firestore().collection('budgets').doc(budgetId).update({  // Update budget in Firestore
         items,
         maxBudget,
         totalValue,
@@ -152,7 +152,7 @@ export default function BudgetScreen({ navigation }) {
       });
 
       const updatedBudgets = budgets.map(budget =>
-        budget.id === budgetId ? { ...budget, items, maxBudget, totalValue, itemCount: items.length } : budget
+        budget.id === budgetId ? { ...budget, items, maxBudget, totalValue, itemCount: items.length } : budget  // Update budget in state
       );
       setBudgets(updatedBudgets);
       navigation.navigate('BudgetListScreen', { budgets: updatedBudgets });
