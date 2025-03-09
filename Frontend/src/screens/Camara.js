@@ -244,7 +244,7 @@ export default function CameraScreen({ route, navigation }) {
   };
 
   const extractPrices = (text) => {
-    const priceRegex = /(?:Rs|RS|₹)\s*[:=]?\s*([\d,.]+)/g;
+    const priceRegex = /(?:Rs|RS|₹|Price|price|PRICE)\s*[:=]?\s*([\d,.]+)/g;
     const matches = text.match(priceRegex);
     return matches ? matches.map(price => parseFloat(price.replace(/[^0-9.]/g, '').replace(/,/g, ''))) : [];
   };
