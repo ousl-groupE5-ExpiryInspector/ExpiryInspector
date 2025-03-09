@@ -6,6 +6,7 @@ import NavBar from '../components/navigationBar';
 import { launchImageLibrary } from 'react-native-image-picker';
 import Title3 from '../components/Title3';
 import firestore from '@react-native-firebase/firestore';
+import DescriptionText from '../components/DescriptionText';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function ItemDetail({ route, navigation }) {
@@ -207,11 +208,17 @@ export default function ItemDetail({ route, navigation }) {
         <Modal visible={showModal} transparent={true} animationType="slide">
           <View style={styles.modalView}>
             <Text style={styles.modalTitle}>Update Item</Text>
+            <DescriptionText>Name</DescriptionText>
             <TextInput style={styles.input} placeholder="Item Name" value={modalItem.name} onChangeText={text => setModalItem({ ...modalItem, name: text })} />
+            <DescriptionText>Description</DescriptionText>
             <TextInput style={styles.input} placeholder="Description" value={modalItem.description} onChangeText={text => setModalItem({ ...modalItem, description: text })} />
-            <TextInput style={styles.input} placeholder="Manufacture Date (YYYY-MM-DD)" value={modalItem.manufactureDate} onChangeText={text => setModalItem({ ...modalItem, manufactureDate: text })} />
+            <DescriptionText>Manufacture Date</DescriptionText>
+            <TextInput style={styles.input} placeholder=" (YYYY-MM-DD)" value={modalItem.manufactureDate} onChangeText={text => setModalItem({ ...modalItem, manufactureDate: text })} />
+            <DescriptionText>Expire Date</DescriptionText>  
             <TextInput style={styles.input} placeholder="Expire Date (YYYY-MM-DD)" value={modalItem.expireDate} onChangeText={text => setModalItem({ ...modalItem, expireDate: text })} />
+            <DescriptionText>Quantity</DescriptionText>
             <TextInput style={styles.input} placeholder="Quantity" keyboardType="numeric" value={modalItem.qty} onChangeText={text => setModalItem({ ...modalItem, qty: Number(text) })} />
+            <DescriptionText>Price</DescriptionText>
             <TextInput style={styles.input} placeholder="Price" keyboardType="numeric" value={modalItem.price} onChangeText={text => setModalItem({ ...modalItem, price: Number(text) })} />
             <TouchableOpacity style={styles.modalButton} onPress={updateItem}>
               <Text style={styles.buttonText}>Save Changes</Text>
@@ -296,8 +303,8 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     borderColor: '#ccc',
     padding: 10,
-    marginBottom: 10,
-    width: '80%',
+    marginBottom: 5,
+    width: '100%',
     alignSelf: 'center',
   },
   modalButton: {

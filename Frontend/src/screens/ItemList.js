@@ -104,7 +104,7 @@ export default function ItemList({ route, navigation }) {
           <Title2>AMOUNT</Title2>
           <CoverNums>{totalValue}</CoverNums>
         </View>
-        <View>
+        <View style={{ marginLeft: 15 }}>
           <Title2>Items</Title2>
           <CoverNums>{items.length}</CoverNums>
         </View>
