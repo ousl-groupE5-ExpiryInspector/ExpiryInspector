@@ -298,7 +298,7 @@ const styles = StyleSheet.create({
   },
   rectangle: {
     width: 400,
-    height: 400,
+    height: 250,
     backgroundColor: 'black',
     justifyContent: 'center',
     alignItems: 'center',
@@ -317,7 +317,7 @@ const styles = StyleSheet.create({
   textLabel: {
     fontSize: 22,
     fontWeight: 'bold',
-    marginVertical: 10,
+    marginBottom: 10,
   },
   captureButton: {
     backgroundColor: 'orange',
