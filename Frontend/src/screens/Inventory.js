@@ -13,60 +13,75 @@ import NavBar from '../components/navigationBar';
 
 export default function InventoryScreen({ navigation }) {
   const [stocks, setStocks] = useState([]);
+  const userId = auth().currentUser?.uid; // Get the current logged-in user ID
 
   useEffect(() => {
-    const userId = auth().currentUser?.uid;
-    if (!userId) return;
+    if (!userId) return; // If no user is logged in, return
 
-    // Fetch categories from users collection
-    const userRef = firestore().collection('users').doc(userId);
-    userRef.get().then(async (doc) => {
-      if (doc.exists) {
-        const categories = doc.data().categories || []; // Get categories array from user
+    const fetchData = async () => {
+      try {
+        // 1️⃣ Get user categories from the 'users' collection
+        const userDoc = await firestore().collection('users').doc(userId).get();
+        if (!userDoc.exists) {
+          console.log('No user document found');
+          return;
+        }
 
-        // Fetch items for each category
-        const categoryPromises = categories.map(async (category) => {
-          const itemsSnapshot = await firestore()
-            .collection('items')
-            .where('userId', '==', userId)
-            .where('category', '==', category.name)
-            .get();
+        const userCategories = userDoc.data().categories || [];
+        console.log('User Categories:', userCategories);
 
-          const items = itemsSnapshot.docs.map((doc) => doc.data());
+        // 2️⃣ Get items filtered by the current userId (userId in each item document)
+        const itemsSnapshot = await firestore()
+          .collection('items')
+          .where('userId', '==', userId) // Filter items by the userId
+          .get();
 
-          // Calculate values
-          const inStock = items.length;
-          const totalValue = items.reduce(
-            (sum, item) => sum + ((Number(item.qty) || 0) * (Number(item.price) || 0)),
+        const allItems = itemsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        console.log('All Items for User:', allItems);
+
+        // 3️⃣ Filter items based on the user's categories
+        const filteredItems = allItems.filter(item =>
+          userCategories.some(category => category.name === item.category) // Match category with user's categories
+        );
+        console.log('Filtered Items:', filteredItems);
+
+        // 4️⃣ Process each category
+        const formattedData = userCategories.map((category, index) => {
+          const categoryItems = filteredItems.filter(item => item.category === category.name);
+
+          const totalValue = categoryItems.reduce(
+            (sum, item) => sum + (Number(item.qty) || 0) * (Number(item.price) || 0),
             0
           );
-          const expiringSoon = items.filter(item =>
-            new Date(item.expireDate) < new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
+          const expiringSoon = categoryItems.filter(item => 
+            new Date(item.expireDate) < new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)
           ).length;
 
           return {
-            id: category.name, // Use category name as unique ID
+            id: index.toString(),
             category: category.name,
-            description: category.description || '',
-            inStock,
+            inStock: categoryItems.length,
             expiringSoon,
             totalValue,
+            description: category.description || '',
           };
         });
 
-        // Wait for all category data to be fetched
-        const stockData = await Promise.all(categoryPromises);
-        setStocks(stockData);
+        setStocks(formattedData);
+      } catch (error) {
+        console.error('Error fetching data:', error);
       }
-    });
-  }, []);
+    };
+
+    fetchData();
+  }, [userId]);
 
   const renderItem = ({ item }) => (
     <TouchableOpacity onPress={() => navigation.navigate('ItemList', { category: item.category })}>
       <View style={styles.stockItem}>
         <View style={styles.leftColumn}>
-          <Title2>{item.category}</Title2>
-          <DescriptionText>{item.description}</DescriptionText>
+          <Title2>{item.category || 'Unknown'}</Title2>
+          <DescriptionText>{item.description || ''}</DescriptionText>
         </View>
 
         <View style={styles.midColumn}>
@@ -76,9 +91,9 @@ export default function InventoryScreen({ navigation }) {
         </View>
 
         <View style={styles.rightColumn}>
-          <NumberValue>{item.inStock}</NumberValue>
-          <NumberValue>{item.expiringSoon}</NumberValue>
-          <NumberValue>{item.totalValue.toFixed(2)}</NumberValue>
+          <NumberValue>{item.inStock || 0}</NumberValue>
+          <NumberValue>{item.expiringSoon || 0}</NumberValue>
+          <NumberValue>{typeof item.totalValue === 'number' ? item.totalValue.toFixed(2) : '0.00'}</NumberValue>
         </View>
       </View>
     </TouchableOpacity>
@@ -86,7 +101,7 @@ export default function InventoryScreen({ navigation }) {
 
   return (
     <BackgroundFlex>
-      <HeaderWithIcon title="Stocks" MoveTo="Dashboard" navigation={navigation} />
+      <HeaderWithIcon title="Stocks" MoveTo='Dashboard' navigation={navigation} />
       <TopBarButtons
         style={{ padding: -20 }}
         onExpiredPress={() => navigation.navigate('InventoryExpired')}
@@ -103,8 +118,6 @@ export default function InventoryScreen({ navigation }) {
     </BackgroundFlex>
   );
 }
-
-
 
 const styles = StyleSheet.create({
   stockItem: {
