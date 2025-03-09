@@ -1,22 +1,20 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, ActivityIndicator, TextInput, Button, Alert, Image, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, ActivityIndicator, TextInput, Button, Alert, Image, TouchableOpacity } from 'react-native';
+import BackgroundFlex from '../components/BackgroundFlex';
+import HeaderWithIcon from '../components/HeaderWithIcon';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { doc, getDoc, updateDoc } from 'firebase/firestore';
-import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { launchImageLibrary } from 'react-native-image-picker';
 import { signOut, onAuthStateChanged } from 'firebase/auth';
-import { auth, firestore, storage } from '../auth/firebaseConfig';
-import { initializeApp } from 'firebase/app';
+import { auth, firestore } from '../auth/firebaseConfig';
 
-export default function UserAccount() {
+export default function UserAccount({ navigation }) {
   const [userData, setUserData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [profilePicture, setProfilePicture] = useState(null);
   const [userId, setUserId] = useState(null);
-
-  //const app = initializeApp(firebaseConfig);
 
   const saveUserId = async (userId) => {
     try {
@@ -114,108 +112,133 @@ export default function UserAccount() {
       console.error('❌ Error logging out:', error);
       Alert.alert('Error', 'Failed to log out.');
     }
+    navigation.navigate('Login');
   };
 
-  // Function to pick an image from the gallery and upload it to Firebase Storage
-
-  const pickImage = async () => {
-    const options = {
-      mediaType: 'photo',
-      quality: 1, // Best quality
-    };
-  
-    launchImageLibrary(options, async (response) => {
-      if (response.didCancel) {
-        console.log('User cancelled image picker');
-        return;
-      }
-      if (response.errorMessage) {
-        console.log('ImagePicker Error: ', response.errorMessage);
-        return;
-      }
+  const pickImage = () => {
+    launchImageLibrary({ mediaType: 'photo', quality: 1, includeBase64: true }, response => {
       if (response.assets && response.assets.length > 0) {
-        const selectedImage = response.assets[0].uri;
-        console.log('📷 Image Selected:', selectedImage);
-        uploadImage(selectedImage); // Upload image to Firebase Storage
+        const base64Image = `data:image/jpeg;base64,${response.assets[0].base64}`;
+        console.log(' Base64 Image Selected');
+        setProfilePicture(base64Image);
+        saveImageToFirestore(base64Image);
       }
     });
   };
-  
 
-// Function to upload image to Firebase Storage
-const uploadImage = async (imageUri) => {
-  if (!userId) {
-    Alert.alert('Error', 'User ID not found.');
-    return;
-  }
+  const saveImageToFirestore = async (base64Image) => {
+    if (!userId) {
+      Alert.alert('Error', 'User ID not found.');
+      return;
+    }
 
-  try {
-    const response = await fetch(imageUri);
-    const blob = await response.blob();
-    const storageRef = ref(storage, `profile_pictures/${userId}.jpg`);
-    const uploadTask = uploadBytesResumable(storageRef, blob);
-
-    uploadTask.on(
-      'state_changed',
-      (snapshot) => {
-        const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-        console.log(`Upload is ${progress}% done`);
-      },
-      (error) => {
-        console.error('❌ Error uploading image:', error);
-        Alert.alert('Upload Error', 'Failed to upload profile picture.');
-      },
-      async () => {
-        const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
-        console.log('✅ Image uploaded successfully:', downloadURL);
-        setProfilePicture(downloadURL);
-        await updateDoc(doc(firestore, 'users', userId), { profile_Picture: downloadURL });
-        Alert.alert('Success', 'Profile picture updated!');
-      }
-    );
-  } catch (error) {
-    console.error('❌ Error uploading image:', error);
-    Alert.alert('Error', 'Failed to upload image.');
-  }
-};
+    try {
+      const userDocRef = doc(firestore, 'users', userId);
+      await updateDoc(userDocRef, { profile_picture: base64Image });
+      Alert.alert('Success', 'Profile picture updated!');
+      console.log('✅ Base64 Image saved to Firestore');
+    } catch (error) {
+      console.error('❌ Error saving image to Firestore:', error);
+      Alert.alert('Error', 'Failed to save image.');
+    }
+  };
 
   return (
-    <View style={{ padding: 20, alignItems: 'center' }}>
-      {loading ? (
-        <ActivityIndicator size="large" color="blue" />
-      ) : userData ? (
-        <>
-          <Text>ID: {userId}</Text>
+    <BackgroundFlex>
+      <HeaderWithIcon title="User Profile" MoveTo="Dashboard" navigation={navigation} />
+      <View style={styles.container}>
+        {loading ? (
+          <ActivityIndicator size="large" color="blue" />
+        ) : userData ? (
+          <>
+            <TouchableOpacity onPress={pickImage}>
+            <Image 
+              source={profilePicture && profilePicture.trim() !== "" ? 
+              { uri: profilePicture } : 
+              require('../../assets/userAccount_pic.png')} 
+                style={styles.userAccountImg} />
+            </TouchableOpacity>
 
-          {/* Profile Picture */}
-          <TouchableOpacity onPress={pickImage}>
-            <Image
-              source={profilePicture ? { uri: profilePicture } : require('../../assets/Login.png')}
-              style={{ width: 100, height: 100, borderRadius: 50, marginBottom: 10 }}
-            />
-            <Button title="Upload Profile Picture" onPress={pickImage} />
+            <View style={styles.infoContainer}>
+              <Text style={styles.label}>Name:</Text>
+              <TextInput style={styles.infoText} value={name} onChangeText={setName} placeholder="Enter Name" />
 
-          </TouchableOpacity>
+              <Text style={styles.label}>Email:</Text>
+              <TextInput style={styles.infoText} value={email} onChangeText={setEmail} placeholder="Enter Email" keyboardType="email-address" />
+            </View>
 
-          <TextInput
-            value={name}
-            onChangeText={setName}
-            placeholder="Enter Name"
-            style={{ borderWidth: 1, padding: 8, marginBottom: 10, width: '100%' }}
-          />
-          <TextInput
-            value={email}
-            onChangeText={setEmail}
-            placeholder="Enter Email"
-            style={{ borderWidth: 1, padding: 8, marginBottom: 10, width: '100%' }}
-          />
-          <Button title="Save" onPress={handleSave} />
-          <View style={{ marginTop: 10 }} />
-          <Button title="Logout" color="red" onPress={handleLogout} />
-        </>
-      ) : (
-        <Text>No user logged in</Text>
-      )}
-    </View>
+            <TouchableOpacity style={styles.logoutButton} onPress={handleSave}>
+              <Text style={styles.buttonText}>Save Changes</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
+              <Text style={styles.buttonText}>Logout</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.deleteButton}>
+              <Text style={styles.buttonText}>Delete account</Text>
+            </TouchableOpacity>
+          </>
+        ) : (
+          <Text>No user logged in</Text>
+        )}
+      </View>
+    </BackgroundFlex>
   );
 }
+
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: '100%',
+  },
+  userAccountImg: {
+    width: 200,
+    height: 201,
+    borderRadius: 100,
+    resizeMode: 'contain',
+    marginBottom: 30,
+  },
+  infoContainer: {
+    width: '80%',
+    marginBottom: 40,
+  },
+  label: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    marginBottom: 5,
+    color: 'white',
+  },
+  infoText: {
+    fontSize: 18,
+    backgroundColor: '#d3d3d3',
+    padding: 10,
+    borderRadius: 8,
+    marginBottom: 20,
+    color: 'black',
+  },
+  logoutButton: {
+    width: '80%',
+    height: 50,
+    backgroundColor: 'black',
+    borderRadius: 10,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 10,
+  },
+  deleteButton: {
+    width: '80%',
+    height: 50,
+    backgroundColor: '#8B0000',
+    borderRadius: 10,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  buttonText: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: 'white',
+  },
+});

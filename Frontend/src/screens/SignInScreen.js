@@ -35,7 +35,7 @@ export default function SignUpScreen({ navigation }) {
       const user = userCredentials.user;
       console.log('Registered with:', user.email);
   
-      const defaultProfilePic = 'https://example.com/default-profile.png'; // Replace with actual URL
+      const defaultProfilePic = '';
   
       // Default categories stored as a field inside user document
       const defaultCategories = [
@@ -44,6 +44,7 @@ export default function SignUpScreen({ navigation }) {
         { name: 'Grains', description: 'Rice, wheat, etc.', items: [] },
         { name: 'Glossary', description: 'Other items.', items: [] },
         { name: 'Sanitary', description: 'Sanitary items.', items: [] },
+        { name: 'Other', description: 'Other household items.', items: [] },
       ];
   
       // Store user data including categories

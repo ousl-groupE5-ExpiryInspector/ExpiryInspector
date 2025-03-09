@@ -244,7 +244,7 @@ export default function CameraScreen({ route, navigation }) {
   };
 
   const extractPrices = (text) => {
-    const priceRegex = /(?:Rs|RS|₹)\s*[:=]?\s*([\d,.]+)/g;
+    const priceRegex = /(?:Rs|RS|₹|Price|price|PRICE)\s*[:=]?\s*([\d,.]+)/g;
     const matches = text.match(priceRegex);
     return matches ? matches.map(price => parseFloat(price.replace(/[^0-9.]/g, '').replace(/,/g, ''))) : [];
   };
@@ -298,7 +298,7 @@ const styles = StyleSheet.create({
   },
   rectangle: {
     width: 400,
-    height: 400,
+    height: 250,
     backgroundColor: 'black',
     justifyContent: 'center',
     alignItems: 'center',
@@ -317,7 +317,7 @@ const styles = StyleSheet.create({
   textLabel: {
     fontSize: 22,
     fontWeight: 'bold',
-    marginVertical: 10,
+    marginBottom: 10,
   },
   captureButton: {
     backgroundColor: 'orange',

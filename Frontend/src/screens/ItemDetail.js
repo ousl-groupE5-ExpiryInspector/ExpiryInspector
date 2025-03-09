@@ -6,12 +6,13 @@ import NavBar from '../components/navigationBar';
 import { launchImageLibrary } from 'react-native-image-picker';
 import Title3 from '../components/Title3';
 import firestore from '@react-native-firebase/firestore';
+import DescriptionText from '../components/DescriptionText';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function ItemDetail({ route, navigation }) {
   const handleCamera = () => {
     //navigation.navigate('Camara');
     navigation.navigate('Camara', { itemId: item.id });
-
   };
 
   const item = route.params?.item || {
@@ -32,7 +33,6 @@ export default function ItemDetail({ route, navigation }) {
         ...prevItem,
         ...route.params.item, 
       }));
-  
 
       if (route.params.item.id) {
         const docRef = firestore().collection('items').doc(route.params.item.id);
@@ -52,9 +52,6 @@ export default function ItemDetail({ route, navigation }) {
     }
   }, [route.params?.item]); 
   
-  
-  
-
   const [updatedItem, setUpdatedItem] = useState({ ...item });
   const [showModal, setShowModal] = useState(false);
   const [modalItem, setModalItem] = useState({ ...updatedItem });
@@ -65,13 +62,36 @@ export default function ItemDetail({ route, navigation }) {
   }, [updatedItem.qty, updatedItem.price]);
 
   const pickImage = () => {
-    launchImageLibrary({ mediaType: 'photo', quality: 1 }, response => {
-      if (!response.didCancel && !response.error) {
-        const imageUri = response.assets[0].uri;
-        setUpdatedItem({ ...updatedItem, image: imageUri });
-      }
-    });
+    launchImageLibrary({ mediaType: 'photo', quality: 1, includeBase64: true }, response => {
+          if (response.assets && response.assets.length > 0) {
+            const base64Image = `data:image/jpeg;base64,${response.assets[0].base64}`;
+            console.log(' Base64 Image Selected');
+            setUpdatedItem(prevItem => ({
+              ...prevItem,
+              image: base64Image,
+            }));
+            
+            saveImageToFirestore(base64Image);
+          }
+        });
   };
+
+  const saveImageToFirestore = async (base64Image) => {
+    if (!item.id) {
+      Alert.alert('Error', 'item ID not found.');
+      return;
+    }
+
+    try {
+      const userDocRef = firestore().collection('items').doc(item.id);
+      await userDocRef.update({ image: base64Image });
+      Alert.alert('Success', 'item picture updated!');
+      console.log(' Base64 Image saved to Firestore');
+    } catch (error) {
+      console.error(' Error saving image to Firestore:', error);
+      Alert.alert('Error', 'Failed to save image.');
+    }
+  }; 
 
   const handleDeleteItem = () => {
     Alert.alert("Confirm Delete", "Are you sure you want to delete this item?", [
@@ -121,11 +141,11 @@ export default function ItemDetail({ route, navigation }) {
 
         <View style={{ alignItems: 'center' }}>
           <TouchableOpacity onPress={pickImage}>
-            {updatedItem.image ? (
-              <Image source={{ uri: updatedItem.image }} style={styles.placeholderImage} />
-            ) : (
-              <Image source={require('../../assets/PlaceHolder_Item.jpg')} style={styles.placeholderImage} />
-            )}
+            <Image 
+                source={updatedItem.image && updatedItem.image.trim() !== "" ? 
+                          { uri: updatedItem.image } : 
+                          require('../../assets/PlaceHolder_Item.jpg')} 
+                          style={styles.placeholderImage} />
           </TouchableOpacity>
           <TouchableOpacity style={styles.deleteIcon} onPress={handleCamera}>
             <Image source={require('../../assets/camera_icon2.png')} style={styles.iconImage} />
@@ -188,11 +208,17 @@ export default function ItemDetail({ route, navigation }) {
         <Modal visible={showModal} transparent={true} animationType="slide">
           <View style={styles.modalView}>
             <Text style={styles.modalTitle}>Update Item</Text>
+            <DescriptionText>Name</DescriptionText>
             <TextInput style={styles.input} placeholder="Item Name" value={modalItem.name} onChangeText={text => setModalItem({ ...modalItem, name: text })} />
+            <DescriptionText>Description</DescriptionText>
             <TextInput style={styles.input} placeholder="Description" value={modalItem.description} onChangeText={text => setModalItem({ ...modalItem, description: text })} />
-            <TextInput style={styles.input} placeholder="Manufacture Date (YYYY-MM-DD)" value={modalItem.manufactureDate} onChangeText={text => setModalItem({ ...modalItem, manufactureDate: text })} />
+            <DescriptionText>Manufacture Date</DescriptionText>
+            <TextInput style={styles.input} placeholder=" (YYYY-MM-DD)" value={modalItem.manufactureDate} onChangeText={text => setModalItem({ ...modalItem, manufactureDate: text })} />
+            <DescriptionText>Expire Date</DescriptionText>  
             <TextInput style={styles.input} placeholder="Expire Date (YYYY-MM-DD)" value={modalItem.expireDate} onChangeText={text => setModalItem({ ...modalItem, expireDate: text })} />
+            <DescriptionText>Quantity</DescriptionText>
             <TextInput style={styles.input} placeholder="Quantity" keyboardType="numeric" value={modalItem.qty} onChangeText={text => setModalItem({ ...modalItem, qty: Number(text) })} />
+            <DescriptionText>Price</DescriptionText>
             <TextInput style={styles.input} placeholder="Price" keyboardType="numeric" value={modalItem.price} onChangeText={text => setModalItem({ ...modalItem, price: Number(text) })} />
             <TouchableOpacity style={styles.modalButton} onPress={updateItem}>
               <Text style={styles.buttonText}>Save Changes</Text>
@@ -207,9 +233,6 @@ export default function ItemDetail({ route, navigation }) {
     </BackgroundFlex>
   );
 }
-
-
-
 
 const styles = StyleSheet.create({
   placeholderImage: {
@@ -272,26 +295,28 @@ const styles = StyleSheet.create({
   modalTitle: {
     fontSize: 20,
     fontWeight: 'bold',
+    textAlign: 'center',
     marginBottom: 20,
   },
   input: {
-    height: 40,
-    borderColor: '#ddd',
     borderWidth: 1,
-    marginBottom: 10,
-    padding: 10,
     borderRadius: 5,
+    borderColor: '#ccc',
+    padding: 10,
+    marginBottom: 5,
+    width: '100%',
+    alignSelf: 'center',
   },
   modalButton: {
-    backgroundColor: '#28a745',
+    backgroundColor: '#FFD1C4',
     padding: 10,
-    marginTop: 10,
     borderRadius: 5,
-    alignItems: 'center',
+    marginBottom: 10,
+    width: '80%',
+    alignSelf: 'center',
   },
   buttonText: {
-    color: 'white',
-    fontSize: 16,
-  }
-  
+    fontSize: 18,
+    textAlign: 'center',
+  },
 });
