@@ -6,222 +6,139 @@ import Title3 from '../components/Title3';
 import Title2 from '../components/Title2';
 import CoverNums from '../components/CoverNums';
 import NavBar from '../components/navigationBar';
+import TopBarButtons2 from '../components/TopBarButtons2';
 import firestore from '@react-native-firebase/firestore';
 import auth from '@react-native-firebase/auth';
 
-export default function BudgetScreen({ navigation }) {
+export default function BudgetScreen({ navigation, route }) {
   const [items, setItems] = useState([]);
-  const [showModal, setShowModal] = useState(false); // State to control modal
-  const [newItem, setNewItem] = useState({ name: '', qty: '', price: '' }); // State for new item
+  const [showModal, setShowModal] = useState(false);
+  const [newItem, setNewItem] = useState({ name: '', qty: '', price: '' });
   const [maxBudget, setMaxBudget] = useState(0);
   const [totalValue, setTotalValue] = useState(0);
-  const [budgets, setBudgets] = useState([]); // State to store all budgets
-  const [isBudgetSaved, setIsBudgetSaved] = useState(false); // State to check if budget is saved
-  const [previousMaxBudget, setPreviousMaxBudget] = useState(0); // State to store previous max budget
-
-  // Get user ID
-  useEffect(() => {
-    const fetchBudgets = async () => {
-      const userId = getUserId();
-      if (!userId) return;
-
-      try {
-        const snapshot = await firestore()  // Fetch budgets from Firestore
-          .collection('budgets')
-          .where('userId', '==', userId)
-          .get();
-
-        const fetchedBudgets = snapshot.docs.map(doc => ({
-          id: doc.id,
-          ...doc.data(),
-        }));
-
-        setBudgets(fetchedBudgets);  // Set budgets state with fetched budgets
-      } catch (error) {
-        console.error("Error fetching budgets:", error);
-      }
-    };
-
-    fetchBudgets();
-  }, []);
+  const [budgetName, setBudgetName] = useState('');
+  const [budgetId, setBudgetId] = useState(null);
 
   useEffect(() => {
-    if (previousMaxBudget !== 0 && previousMaxBudget !== maxBudget) {  // Check if max budget has changed
-      setIsBudgetSaved(false);
-      setTotalValue(0); // Reset total value
-      setItems([]); // Clear items
+    if (route.params?.budget) {
+      const { id, name, items, maxBudget, totalValue } = route.params.budget;
+      setBudgetId(id);
+      setBudgetName(name);
+      setItems(items);
+      setMaxBudget(maxBudget);
+      setTotalValue(totalValue);
     }
-  }, [maxBudget]);
+  }, [route.params?.budget]);
 
-  // Calculate available balance
   const availableBalance = maxBudget - totalValue;
 
-  //save budget to firestore
   const saveBudget = async () => {
-    if (items.length > 0 && totalValue > 0 && !isBudgetSaved) {
-      try {
-        const user = auth().currentUser;
-        if (!user) {
-          Alert.alert('Error', 'User not authenticated');
-          return;
-        }
-
-        const budgetRef = firestore().collection('budgets').doc();
-        const newBudget = {
-          id: budgetRef.id, // Firestore auto-generated ID
-          userId: user.uid,
-          items,
-          maxBudget,
-          totalValue,
-          itemCount: items.length,
-          createdAt: firestore.FieldValue.serverTimestamp()
-        };
-
-        await budgetRef.set(newBudget);
-        setBudgets([...budgets, newBudget]); // Add new budget to state
-        setIsBudgetSaved(true);
-        setPreviousMaxBudget(maxBudget);
-        navigation.navigate('BudgetListScreen', { budgets: [...budgets, newBudget] });
-      } catch (error) {
-        Alert.alert('Error', 'Failed to save budget');
-        console.error(error);
-      }
-    } else if (!isBudgetSaved) {
-      Alert.alert('Alert', 'Please create your budget before saving.');
-    } else {
-      try {
-        const user = auth().currentUser;
-        if (!user) {
-          Alert.alert('Error', 'User not authenticated');
-          return;
-        }
-
-        const latestBudget = budgets[budgets.length - 1];  // Get the latest budget
-        const updatedBudget = {
-          ...latestBudget,
-          items,
-          maxBudget,
-          totalValue,
-          itemCount: items.length,
-          updatedAt: firestore.FieldValue.serverTimestamp()
-        };
-
-        await firestore().collection('budgets').doc(latestBudget.id).update(updatedBudget); // Update budget in Firestore
-
-        const updatedBudgets = budgets.map(budget =>
-          budget.id === latestBudget.id ? updatedBudget : budget
-        );
-        setBudgets(updatedBudgets);
-        navigation.navigate('BudgetListScreen', { budgets: updatedBudgets });
-      } catch (error) {
-        Alert.alert('Error', 'Failed to update budget');
-        console.error(error);
-      }
+    const user = auth().currentUser;
+    if (!user) {
+      Alert.alert('Error', 'User not authenticated');
+      return;
     }
+
+    if (!budgetName) {
+      Alert.prompt('Budget Name', 'Enter a name for your budget:', text => {
+        if (text) {
+          setBudgetName(text);
+          handleSave(user.uid, text);
+        }
+      });
+      return;
+    }
+
+    handleSave(user.uid, budgetName);
   };
 
-  // Add a new item to the list
-  const addItem = () => {
-    if (newItem.name && newItem.qty && newItem.price) {
-      const newItemWithTotal = { ...newItem, id: items.length + 1, total: parseFloat(newItem.price) * parseFloat(newItem.qty) };
-      setItems([...items, newItemWithTotal]);
-
-      // Update total value with the new item's total price
-      const newTotalValue = totalValue + newItemWithTotal.total;
-      setTotalValue(newTotalValue);
-
-      setNewItem({ name: '', qty: '', price: '' }); // Reset the form
-      setShowModal(false); // Close the modal
-    } else {
-      Alert.alert('Error', 'Please fill in all fields');
+  const handleSave = async (userId, name) => {
+    if (items.length === 0 || totalValue === 0) {
+      Alert.alert('Alert', 'Please add items before saving.');
+      return;
     }
-  };
-
-  // Update budget with new items
-  const updateBudget = async (budgetId) => {
-    const userId = getUserId();
-    if (!userId) return;
 
     try {
-      await firestore().collection('budgets').doc(budgetId).update({  // Update budget in Firestore
-        items,
-        maxBudget,
-        totalValue,
-        itemCount: items.length,
-        updatedAt: firestore.FieldValue.serverTimestamp(),
-      });
+      if (budgetId) {
+        await firestore().collection('budgets').doc(budgetId).update({
+          name,
+          items,
+          maxBudget,
+          totalValue,
+          updatedAt: firestore.FieldValue.serverTimestamp(),
+        });
+      } else {
+        const budgetRef = firestore().collection('budgets').doc();
+        const newBudget = {
+          id: budgetRef.id,
+          userId,
+          name,
+          items,
+          maxBudget,
+          totalValue,
+          createdAt: firestore.FieldValue.serverTimestamp(),
+        };
+        await budgetRef.set(newBudget);
+      }
 
-      const updatedBudgets = budgets.map(budget =>
-        budget.id === budgetId ? { ...budget, items, maxBudget, totalValue, itemCount: items.length } : budget  // Update budget in state
-      );
-      setBudgets(updatedBudgets);
-      navigation.navigate('BudgetListScreen', { budgets: updatedBudgets });
-
+      navigation.navigate('BudgetListScreen');
     } catch (error) {
-      console.error("Error updating budget:", error);
+      Alert.alert('Error', 'Failed to save budget');
+      console.error(error);
     }
   };
 
+  const addItem = () => {
+    if (!newItem.name || !newItem.qty || !newItem.price) {
+      Alert.alert('Error', 'Please fill in all fields');
+      return;
+    }
 
-  // Delete selected item
-  const deleteItem = async (id) => {
-    Alert.alert(
-      "Delete Item",
-      "Are you sure you want to delete this item?",
-      [
-        { text: "Cancel", style: "cancel" },
-        {
-          text: "OK", onPress: async () => {
-            const filteredItems = items.filter(item => item.id !== id);
-            const deletedItem = items.find(item => item.id === id);
-            setItems(filteredItems);
-            setTotalValue(totalValue - deletedItem.total);
-          }
-        }
-      ]
-    );
+    const newItemWithTotal = {
+      ...newItem,
+      id: items.length + 1,
+      total: parseFloat(newItem.price) * parseFloat(newItem.qty),
+    };
+    setItems([...items, newItemWithTotal]);
+    setTotalValue(totalValue + newItemWithTotal.total);
+    setNewItem({ name: '', qty: '', price: '' });
+    setShowModal(false);
   };
 
-
-  // Render each item with 'name', 'QTY', 'Total'
-  const renderItem = ({ item }) => (
-    <TouchableOpacity onPress={() => { }}>
-      <View style={styles.item}>
-        <Text style={styles.col1}>{item.name}</Text>
-        <Text style={styles.col2}>{item.qty}</Text>
-        <Text style={styles.col3}>{item.total.toFixed(2)}</Text>
-        <TouchableOpacity style={styles.col4} name="delete" color="red" onPress={() => deleteItem(item.id)}>
-          <Image source={require('../../assets/Delete_icon.png')}
-            style={{ width: 25, height: 25 }}
-          />
-        </TouchableOpacity>
-      </View>
-    </TouchableOpacity>
-  );
+  const deleteItem = (id) => {
+    Alert.alert('Delete Item', 'Are you sure you want to delete this item?', [
+      { text: 'Cancel', style: 'cancel' },
+      {
+        text: 'OK',
+        onPress: () => {
+          const filteredItems = items.filter(item => item.id !== id);
+          setTotalValue(totalValue - items.find(item => item.id === id).total);
+          setItems(filteredItems);
+        },
+      },
+    ]);
+  };
 
   return (
     <BackgroundFlex>
-      <HeaderWithIcon title="Budget Planner"
-        MoveTo='Dashboard'
-        navigation={navigation} />
-
-      {/*Save user budget as a list to be displayed in the budgetlist screen*/}
+      <HeaderWithIcon title="Budget Planner" MoveTo="Dashboard" navigation={navigation} />
       <TouchableOpacity style={styles.saveIcon} onPress={saveBudget}>
         <Image source={require('../../assets/save.png')} style={styles.iconImage} />
       </TouchableOpacity>
 
-      {/* Ribbon Section */}
+      <TopBarButtons2
+        onBudgetPress={() => navigation.navigate('Budget')}
+        onSavedPress={() => navigation.navigate('BudgetListScreen')}
+      />
+
+
+
       <View style={styles.ribbonContainer}>
         <View style={{ padding: 15 }}>
           <Title2>Amount</Title2>
-          <CoverNums >{totalValue}</CoverNums>
-          <View style={{ marginTop: 15 }}>
-            <Title3>No of Items</Title3>
-            <Text>{items.length}</Text>
-          </View>
-        </View>
-        <View>
-
+          <CoverNums>{totalValue}</CoverNums>
+          <Title3>No of Items</Title3>
+          <Text>{items.length}</Text>
         </View>
         <View style={styles.budgetColumn}>
           <Title3>Current Budget</Title3>
@@ -232,69 +149,69 @@ export default function BudgetScreen({ navigation }) {
             value={maxBudget.toString()}
             onChangeText={text => setMaxBudget(parseFloat(text) || 0)}
           />
-          <View style={{ padding: 10 }}>
-            <Title3>Available Balance</Title3>
-            <Title3>{availableBalance.toFixed(2)}</Title3>
-          </View>
+          <Title3>Available Balance</Title3>
+          <Title3>{availableBalance.toFixed(2)}</Title3>
         </View>
       </View>
-
-      {/* List Header */}
-      <View style={styles.itemTopic}>
-        <Text style={styles.col1}>Name</Text>
-        <Text style={styles.col2}>Qty</Text>
-        <Text style={styles.col3}>Total</Text>
-        <Text style={styles.col4}></Text>
-      </View>
-
       <FlatList
         data={items}
         keyExtractor={(item) => item.id.toString()}
-        renderItem={renderItem}
-        contentContainerStyle={styles.listContainer}
+        renderItem={({ item }) => (
+          <View style={styles.item}>
+            <Text style={styles.col1}>{item.name}</Text>
+            <Text style={styles.col2}>{item.qty}</Text>
+            <Text style={styles.col3}>{item.total.toFixed(2)}</Text>
+            <TouchableOpacity onPress={() => deleteItem(item.id)}>
+              <Image source={require('../../assets/Delete_icon.png')} style={{ width: 25, height: 25 }} />
+            </TouchableOpacity>
+          </View>
+        )}
       />
-
       <TouchableOpacity style={styles.addButton} onPress={() => setShowModal(true)}>
         <Image source={require('../../assets/Add_icon.png')} style={styles.iconadd} />
       </TouchableOpacity>
-
       <NavBar navigation={navigation} />
 
-      {/* Modal for adding new item */}
+      {/* **MODAL FOR ADDING ITEMS** */}
       <Modal visible={showModal} transparent={true} animationType="slide">
         <View style={styles.modalView}>
-          <Text style={styles.modalTitle}>Add New Item</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="Item Name"
-            value={newItem.name}
-            onChangeText={text => setNewItem({ ...newItem, name: text })}
-          />
-          <TextInput
-            style={styles.input}
-            placeholder="Quantity"
-            keyboardType="numeric"
-            value={newItem.qty}
-            onChangeText={text => setNewItem({ ...newItem, qty: text })}
-          />
-          <TextInput
-            style={styles.input}
-            placeholder="Price"
-            keyboardType="numeric"
-            value={newItem.price}
-            onChangeText={text => setNewItem({ ...newItem, price: text })}
-          />
-          <TouchableOpacity style={styles.modalButton} onPress={addItem}>
-            <Text style={styles.buttonText}>Add Item</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.modalButton} onPress={() => setShowModal(false)}>
-            <Text style={styles.buttonText}>Cancel</Text>
-          </TouchableOpacity>
+          <View style={styles.modalContent}>
+            <TextInput
+              placeholder="Item Name"
+              value={newItem.name}
+              onChangeText={(text) => setNewItem({ ...newItem, name: text })}
+              style={styles.input}
+            />
+            <TextInput
+              placeholder="Quantity"
+              keyboardType="numeric"
+              value={newItem.qty}
+              onChangeText={(text) => setNewItem({ ...newItem, qty: text })}
+              style={styles.input}
+            />
+            <TextInput
+              placeholder="Price"
+              keyboardType="numeric"
+              value={newItem.price}
+              onChangeText={(text) => setNewItem({ ...newItem, price: text })}
+              style={styles.input}
+            />
+            <View style={styles.modalButtons}>
+              <TouchableOpacity onPress={addItem}>
+                <Text style={styles.addButtonText}>Add</Text>
+              </TouchableOpacity>
+              <TouchableOpacity onPress={() => setShowModal(false)}>
+                <Text style={styles.cancelButtonText}>Cancel</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
         </View>
       </Modal>
     </BackgroundFlex>
   );
 }
+
+
 
 const styles = StyleSheet.create({
   item: {
