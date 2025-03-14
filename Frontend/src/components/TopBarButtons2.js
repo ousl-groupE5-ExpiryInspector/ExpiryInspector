@@ -9,12 +9,15 @@ export default function TopBarButtons({ onBudgetPress, onSavedPress }) {
   const currentRouteName = useNavigationState(state => state.routes[state.index].name);
 
   useEffect(() => {
+    console.log("Current Route Name:", currentRouteName); 
+  
     if (currentRouteName === 'Budget') {
       setActivePage('BUDGET');
-    } else if (currentRouteName === 'Saved') {
+    } else if (currentRouteName === 'BudgetListScreen') {
       setActivePage('SAVED');
     }
   }, [currentRouteName]);
+  
 
   return (
     <View style={styles.topBar}>
