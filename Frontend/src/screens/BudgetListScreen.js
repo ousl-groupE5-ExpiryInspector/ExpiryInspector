@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, FlatList, StyleSheet, TouchableOpacity, Alert } from 'react-native';
+import { View, Text, FlatList, StyleSheet, TouchableOpacity, Image, Alert } from 'react-native';
 import BackgroundFlex from '../components/BackgroundFlex';
 import HeaderWithIcon from '../components/HeaderWithIcon';
 import NavBar from '../components/navigationBar';
@@ -28,6 +28,35 @@ export default function BudgetListScreen({ navigation }) {
     return () => unsubscribe();
   }, [userId]);
 
+  // Delete the budget from Firestore
+  const deleteItem = (id, name) => {
+    Alert.alert(
+      "Confirm Deletion",
+      `Are you sure you want to delete the budget: ${name}?`,
+      [
+        {
+          text: "Cancel",
+          style: "cancel"
+        },
+        {
+          text: "OK", 
+          onPress: async () => {
+            try {
+              await firestore()
+                .collection('budgets')
+                .doc(id)
+                .delete();
+              alert(`Budget "${name}" has been deleted successfully.`);
+            } catch (error) {
+              console.error("Error deleting budget: ", error);
+              alert("Error deleting budget. Please try again.");
+            }
+          }
+        }
+      ]
+    );
+  };
+
   return (
     <BackgroundFlex>
       <HeaderWithIcon title="Budget List" MoveTo="Dashboard" navigation={navigation} />
@@ -37,12 +66,16 @@ export default function BudgetListScreen({ navigation }) {
       />
       <FlatList
         data={budgets}
+        style={{ padding: 10 }}
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => (
-          <TouchableOpacity onPress={() => navigation.navigate('BudgetPlanner', { budget: item })}>
+          <TouchableOpacity onPress={() => navigation.navigate('Budget', { budget: item })}>
             <View style={styles.budgetItem}>
               <Text>{item.name}</Text>
-              <Text>{item.totalValue}</Text>
+              <Text>Rs. {item.totalValue}</Text>
+              <TouchableOpacity onPress={() => deleteItem(item.id, item.name)}>
+                <Image source={require('../../assets/Delete_icon.png')} style={{ width: 25, height: 25 }} />
+              </TouchableOpacity>
             </View>
           </TouchableOpacity>
         )}
@@ -51,7 +84,6 @@ export default function BudgetListScreen({ navigation }) {
     </BackgroundFlex>
   );
 }
-
 
 const styles = StyleSheet.create({
   budgetItem: {
@@ -62,6 +94,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
+    width: '100%',
   },
   budgetTitle: {
     fontSize: 18,
