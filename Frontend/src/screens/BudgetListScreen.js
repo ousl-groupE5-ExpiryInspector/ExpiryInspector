@@ -39,7 +39,7 @@ export default function BudgetListScreen({ navigation }) {
           style: "cancel"
         },
         {
-          text: "OK", 
+          text: "OK",
           onPress: async () => {
             try {
               await firestore()

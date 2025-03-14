@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, FlatList, TouchableOpacity, Alert, StyleSheet } from 'react-native';
+import { View, Text, FlatList, TouchableOpacity, Alert, StyleSheet, Image } from 'react-native';
 import BackgroundFlex from '../components/BackgroundFlex';
 import PushNotification from 'react-native-push-notification';
 import NavBar from '../components/navigationBar';
 import HeaderWithIcon from '../components/HeaderWithIcon';
-import { firebase } from '@react-native-firebase/firestore'; 
-import auth from '@react-native-firebase/auth'; 
+import { firebase } from '@react-native-firebase/firestore';
+import auth from '@react-native-firebase/auth';
 
 export default function NotificationScreen({ navigation }) {
   const [notifications, setNotifications] = useState([]);
@@ -139,13 +139,13 @@ export default function NotificationScreen({ navigation }) {
     <BackgroundFlex>
       <View style={{ width: '100%', flex: 1 }}>
         <HeaderWithIcon title="Notifications" MoveTo="Dashboard" navigation={navigation} />
-        <FlatList 
-          data={notifications} 
-          keyExtractor={(item) => item.id} 
-          renderItem={renderNotification} 
+        <FlatList
+          data={notifications}
+          keyExtractor={(item) => item.id}
+          renderItem={renderNotification}
         />
-        <TouchableOpacity onPress={() => refreshNotifications()}>
-          <Text style={styles.refreshButton}>Refresh</Text>
+        <TouchableOpacity style={styles.refreshIcon} onPress={() => refreshNotifications()}>
+          <Image source={require('../../assets/Refresh.png')} style={styles.iconImage} />
         </TouchableOpacity>
         <NavBar navigation={navigation} />
       </View>
@@ -173,10 +173,13 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#666',
   },
-  refreshButton: {
-    fontSize: 16,
-    color: '#007BFF',
-    textAlign: 'center',
-    marginTop: 10,
+  refreshIcon: {
+    position: 'absolute',
+    top: 10,
+    right: 15,
+  },
+  iconImage: {
+    width: 40,
+    height: 40,
   },
 });

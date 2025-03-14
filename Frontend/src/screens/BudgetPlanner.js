@@ -148,7 +148,7 @@ export default function BudgetScreen({ navigation, route }) {
       </View>
       <FlatList
         data={items}
-        style={{padding:10}}
+        style={{ padding: 10 }}
         keyExtractor={(item) => item.id.toString()}
         renderItem={({ item }) => (
           <View style={styles.item}>
