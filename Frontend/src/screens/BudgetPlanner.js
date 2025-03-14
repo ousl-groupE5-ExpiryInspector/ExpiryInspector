@@ -13,6 +13,7 @@ import auth from '@react-native-firebase/auth';
 export default function BudgetScreen({ navigation, route }) {
   const [items, setItems] = useState([]);
   const [showModal, setShowModal] = useState(false);
+  const [showBudgetModal, setShowBudgetModal] = useState(false);  // New state for budget name modal
   const [newItem, setNewItem] = useState({ name: '', qty: '', price: '' });
   const [maxBudget, setMaxBudget] = useState(0);
   const [totalValue, setTotalValue] = useState(0);
@@ -32,24 +33,15 @@ export default function BudgetScreen({ navigation, route }) {
 
   const availableBalance = maxBudget - totalValue;
 
-  const saveBudget = async () => {
+  const saveBudget = () => {
+    console.log('Button Pressed');  // Check if button press is triggered
     const user = auth().currentUser;
     if (!user) {
       Alert.alert('Error', 'User not authenticated');
       return;
     }
 
-    if (!budgetName) {
-      Alert.prompt('Budget Name', 'Enter a name for your budget:', text => {
-        if (text) {
-          setBudgetName(text);
-          handleSave(user.uid, text);
-        }
-      });
-      return;
-    }
-
-    handleSave(user.uid, budgetName);
+    setShowBudgetModal(true);  // Show the modal for entering budget name
   };
 
   const handleSave = async (userId, name) => {
@@ -60,6 +52,7 @@ export default function BudgetScreen({ navigation, route }) {
 
     try {
       if (budgetId) {
+        // If there's a budgetId, update the existing budget
         await firestore().collection('budgets').doc(budgetId).update({
           name,
           items,
@@ -68,6 +61,7 @@ export default function BudgetScreen({ navigation, route }) {
           updatedAt: firestore.FieldValue.serverTimestamp(),
         });
       } else {
+        // If there's no budgetId, create a new budget
         const budgetRef = firestore().collection('budgets').doc();
         const newBudget = {
           id: budgetRef.id,
@@ -126,12 +120,11 @@ export default function BudgetScreen({ navigation, route }) {
         <Image source={require('../../assets/save.png')} style={styles.iconImage} />
       </TouchableOpacity>
 
+
       <TopBarButtons2
         onBudgetPress={() => navigation.navigate('Budget')}
         onSavedPress={() => navigation.navigate('BudgetListScreen')}
       />
-
-
 
       <View style={styles.ribbonContainer}>
         <View style={{ padding: 15 }}>
@@ -155,6 +148,7 @@ export default function BudgetScreen({ navigation, route }) {
       </View>
       <FlatList
         data={items}
+        style={{padding:10}}
         keyExtractor={(item) => item.id.toString()}
         renderItem={({ item }) => (
           <View style={styles.item}>
@@ -207,10 +201,39 @@ export default function BudgetScreen({ navigation, route }) {
           </View>
         </View>
       </Modal>
+
+      {/* **MODAL FOR ENTERING BUDGET NAME** */}
+      <Modal visible={showBudgetModal} transparent={true} animationType="slide">
+        <View style={styles.modalView}>
+          <View style={styles.modalContent}>
+            <TextInput
+              placeholder="Enter Budget Name"
+              value={budgetName}
+              onChangeText={setBudgetName}
+              style={styles.input}
+            />
+            <View style={styles.modalButtons}>
+              <TouchableOpacity
+                onPress={() => {
+                  setShowBudgetModal(false);
+                  const user = auth().currentUser;
+                  if (user && budgetName) {
+                    handleSave(user.uid, budgetName); // Save the budget with the name
+                  }
+                }}
+              >
+                <Text style={styles.addButtonText}>Save</Text>
+              </TouchableOpacity>
+              <TouchableOpacity onPress={() => setShowBudgetModal(false)}>
+                <Text style={styles.cancelButtonText}>Cancel</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </BackgroundFlex>
   );
 }
-
 
 
 const styles = StyleSheet.create({
@@ -225,7 +248,6 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     height: 50,
   },
-
   itemTopic: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -240,17 +262,14 @@ const styles = StyleSheet.create({
     flex: 2
   },
   col3: {
-    flex:
-      3
+    flex: 3
   },
   col4: {
     flex: 1
   },
-
   listContainer: {
     paddingHorizontal: 10,
   },
-
   ribbonContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -295,39 +314,39 @@ const styles = StyleSheet.create({
     shadowColor: '#000',
     shadowOpacity: 0.5,
     shadowRadius: 10,
-    elevation: 10,
+    elevation: 5,
   },
-  modalTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    marginBottom: 20,
+  modalContent: {
+    alignItems: 'center',
   },
   input: {
     height: 40,
+    width: 200,
     borderColor: '#ddd',
     borderWidth: 1,
-    marginBottom: 10,
+    marginBottom: 15,
     padding: 10,
     borderRadius: 5,
   },
-  modalButton: {
-    backgroundColor: '#28a745',
-    padding: 10,
-    marginTop: 10,
-    borderRadius: 5,
-    alignItems: 'center',
+  modalButtons: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    width: '100%',
   },
-  buttonText: {
-    color: 'white',
-    fontSize: 16,
+  addButtonText: {
+    color: 'blue',
+  },
+  cancelButtonText: {
+    color: 'red',
   },
   saveIcon: {
     position: 'absolute',
-    top: 18,
-    right: 20,
+    top: 15,
+    right: 10,
+    zIndex: 100,
   },
   iconImage: {
-    width: 30,
-    height: 30,
-  },
+    width: 40,
+    height: 40,
+  }
 });
