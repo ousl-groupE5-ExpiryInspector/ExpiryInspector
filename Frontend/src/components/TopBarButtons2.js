@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { View, TouchableOpacity, Text, StyleSheet } from 'react-native';
 import { useNavigationState } from '@react-navigation/native';
 
-export default function TopBarButtons({ onBudgetPress, onSavedPress }) {
+export default function TopBarButtons2({ onBudgetPress, onSavedPress }) {
   const [activePage, setActivePage] = useState('BUDGET');
 
   // Get the current route name from navigation state

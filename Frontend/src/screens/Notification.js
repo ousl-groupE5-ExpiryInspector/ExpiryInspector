@@ -100,7 +100,7 @@ export default function NotificationScreen({ navigation }) {
       }
 
       const expireDate = item.expireDate ? new Date(item.expireDate) : null;
-      if (expireDate && expireDate > currentDate && (expireDate - currentDate) / (1000 * 60 * 60 * 24) <= 7) {
+      if (expireDate && expireDate > currentDate && (expireDate - currentDate) / (1000 * 60 * 60 * 24) <= 30) {
         addNotification(newNotifications, `${item.id}-expire`, 'Expiration Alert', `${item.name} expires in ${Math.ceil((expireDate - currentDate) / (1000 * 60 * 60 * 24))} days!`);
       }
     });
