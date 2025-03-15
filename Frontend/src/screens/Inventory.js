@@ -1,5 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, FlatList, StyleSheet, TouchableOpacity} from 'react-native';
+import { View, Text, FlatList, StyleSheet, TouchableOpacity } from 'react-native';
+import firestore from '@react-native-firebase/firestore';
+import auth from '@react-native-firebase/auth';
+import { useFocusEffect } from '@react-navigation/native'; // Import useFocusEffect
 import BackgroundFlex from '../components/BackgroundFlex';
 import HeaderWithIcon from '../components/HeaderWithIcon';
 import TopBarButtons from '../components/TopBarButtons';
@@ -9,42 +12,81 @@ import NumberValue from '../components/NumberValue';
 import DescriptionText from '../components/DescriptionText';
 import NavBar from '../components/navigationBar';
 
-
 export default function InventoryScreen({ navigation }) {
-
-  const moveExpiredPress = () => {
-    navigation.navigate('InventoryExpired');
-  };
-
-  const moveAvailablePress = () => {
-    navigation.navigate('InventoryAvailable');
-  };
-
-  const moveOutOfStockPress = () => {
-    navigation.navigate('InventoryOutOfStock');
-  };
-
   const [stocks, setStocks] = useState([]);
+  const userId = auth().currentUser?.uid; // Get the current logged-in user ID
 
-  useEffect(() => {
-    const sampleData = [
-      { id: 1, category: 'Dairy', inStock: 50, expiringSoon: 5, totalValue: 150.00, description: 'Milk, Cheese, Yogurt, and more.' },
-      { id: 2, category: 'Glossary', inStock: 100, expiringSoon: 10, totalValue: 200.00, description: 'Other items.' },
-      { id: 3, category: 'Spices', inStock: 40, expiringSoon: 2, totalValue: 80.00, description: 'Various spices including turmeric, cumin, and more.' },
-      { id: 4, category: 'Beverages', inStock: 75, expiringSoon: 7, totalValue: 350.00, description: 'Juices, soft drinks, water, and more.' },
-      { id: 5, category: 'Grains', inStock: 40, expiringSoon: 2, totalValue: 800.00, description: 'Rice, wheat, etc.' },
-      { id: 6, category: 'Sanitary', inStock: 75, expiringSoon: 7, totalValue: 300.00, description: 'Sanitary items.' },
-    ];
-    setStocks(sampleData);
-  }, []);
+  // Function to fetch data
+  const fetchData = async () => {
+    if (!userId) return; // If no user is logged in, return
+
+    try {
+      // 1️⃣ Get user categories from the 'users' collection
+      const userDoc = await firestore().collection('users').doc(userId).get();
+      if (!userDoc.exists) {
+        console.log('No user document found');
+        return;
+      }
+
+      const userCategories = userDoc.data().categories || [];
+      console.log('User Categories:', userCategories);
+
+      // 2️⃣ Get items filtered by the current userId (userId in each item document)
+      const itemsSnapshot = await firestore()
+        .collection('items')
+        .where('userId', '==', userId) // Filter items by the userId
+        .get();
+
+      const allItems = itemsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      console.log('All Items for User:', allItems);
+
+      // 3️⃣ Filter items based on the user's categories
+      const filteredItems = allItems.filter(item =>
+        userCategories.some(category => category.name === item.category) // Match category with user's categories
+      );
+      console.log('Filtered Items:', filteredItems);
+
+      // 4️⃣ Process each category
+      const formattedData = userCategories.map((category, index) => {
+        const categoryItems = filteredItems.filter(item => item.category === category.name);
+
+        const totalValue = categoryItems.reduce(
+          (sum, item) => sum + (Number(item.qty) || 0) * (Number(item.price) || 0),
+          0
+        );
+        const expiringSoon = categoryItems.filter(item => 
+          new Date(item.expireDate) < new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)
+        ).length;
+
+        return {
+          id: index.toString(),
+          category: category.name,
+          inStock: categoryItems.length,
+          expiringSoon,
+          totalValue,
+          description: category.description || '',
+        };
+      });
+
+      setStocks(formattedData);
+    } catch (error) {
+      console.error('Error fetching data:', error);
+    }
+  };
+
+  // Use useFocusEffect to refresh data when navigating to the page
+  useFocusEffect(
+    React.useCallback(() => {
+      fetchData();
+    }, [userId]) // Re-fetch data when userId changes
+  );
 
   const renderItem = ({ item }) => (
     <TouchableOpacity onPress={() => navigation.navigate('ItemList', { category: item.category })}>
       <View style={styles.stockItem}>
-
         <View style={styles.leftColumn}>
-          <Title2>{item.category}</Title2>
-          <DescriptionText>{item.description}</DescriptionText>
+          <Title2>{item.category || 'Unknown'}</Title2>
+          <DescriptionText>{item.description || ''}</DescriptionText>
         </View>
 
         <View style={styles.midColumn}>
@@ -54,33 +96,28 @@ export default function InventoryScreen({ navigation }) {
         </View>
 
         <View style={styles.rightColumn}>
-          <NumberValue>{item.inStock}</NumberValue>
-          <NumberValue>{item.expiringSoon}</NumberValue>
-          <NumberValue>{item.totalValue.toFixed(2)}</NumberValue>
+          <NumberValue>{item.inStock || 0}</NumberValue>
+          <NumberValue>{item.expiringSoon || 0}</NumberValue>
+          <NumberValue>{typeof item.totalValue === 'number' ? item.totalValue.toFixed(2) : '0.00'}</NumberValue>
         </View>
-        
       </View>
     </TouchableOpacity>
   );
 
   return (
     <BackgroundFlex>
-      <HeaderWithIcon
-        title="Stocks"
-        MoveTo='Dashboard'
-        navigation={navigation}
+      <HeaderWithIcon title="Stocks" MoveTo='Dashboard' navigation={navigation} />
+      <TopBarButtons
+        style={{ padding: -20 }}
+        onExpiredPress={() => navigation.navigate('InventoryExpired')}
+        onAvailablePress={() => navigation.navigate('InventoryAvailable')}
+        onOutOfStockPress={() => navigation.navigate('InventoryOutOfStock')}
       />
-      <TopBarButtons style={{padding:-20}}
-        onExpiredPress={moveExpiredPress}
-        onAvailablePress={moveAvailablePress}
-        onOutOfStockPress={moveOutOfStockPress}
-      />
-
       <FlatList
         data={stocks}
-        keyExtractor={(item) => item.id.toString()}
+        keyExtractor={(item) => item.id}
         renderItem={renderItem}
-        contentContainerStyle={styles.listContainer} 
+        contentContainerStyle={styles.listContainer}
       />
       <NavBar navigation={navigation} />
     </BackgroundFlex>
@@ -114,7 +151,7 @@ const styles = StyleSheet.create({
     alignItems: 'flex-end',
   },
   listContainer: {
-    margineTop: 20,
+    marginTop: 20,
     paddingHorizontal: 10,
   },
 });

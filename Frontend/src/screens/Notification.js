@@ -1,101 +1,130 @@
 import React, { useState, useEffect } from 'react';
-import {View,Text,FlatList,Button,StyleSheet,TouchableOpacity,Alert,} from 'react-native';
+import { View, Text, FlatList, TouchableOpacity, Alert, StyleSheet, Image } from 'react-native';
 import BackgroundFlex from '../components/BackgroundFlex';
 import PushNotification from 'react-native-push-notification';
 import NavBar from '../components/navigationBar';
 import HeaderWithIcon from '../components/HeaderWithIcon';
+import { firebase } from '@react-native-firebase/firestore';
+import auth from '@react-native-firebase/auth';
 
-export default function NotificationScreen(navigation) {
-  // Sample data for items in the inventory
-  const [items, setItems] = useState([
-    { id: 1, category: 'Dairy', name: 'Milk', qty: 10, expireDate: '2024-12-22', price: 300 },
-    { id: 2, category: 'Glossary', name: 'Bread', qty: 0, expireDate: '2024-12-02', price: 200 },
-    { id: 3, category: 'Spices', name: 'Salt', qty: 1, expireDate: '2024-12-26', price: 1000 },
-    { id: 2, category: 'Grains', name: 'Rice', qty: 0, expireDate: '2024-12-30', price: 225 },
-    { id: 3, category: 'Sanitary', name: 'Soap', qty: 3, expireDate: '2024-12-24', price: 10 },
-  ]);
-
-  // Notifications generated from inventory data
+export default function NotificationScreen({ navigation }) {
   const [notifications, setNotifications] = useState([]);
+  const [items, setItems] = useState([]);
 
   useEffect(() => {
-    // Configure Push Notifications
+    const userId = auth().currentUser?.uid;
+    console.log(" Checking authentication...", userId);
+
+    if (!userId) {
+      console.error(" User not authenticated, cannot fetch items.");
+      return;
+    }
+
+    console.log(" User authenticated:", userId);
+    console.log(" Fetching items from Firestore...");
+
+    const unsubscribe = firebase.firestore()
+      .collection('items') // firebase.firestore()
+      .where('userId', '==', userId)
+      .onSnapshot(
+        snapshot => {
+          if (!snapshot.empty) {
+            console.log(" *Firestore connection successful.*");
+          } else {
+            console.warn(" No items found for this user.");
+          }
+
+          const fetchedItems = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+          console.log(" ### Firestore Data Fetched ###:", fetchedItems);
+
+          setItems(fetchedItems);
+          refreshNotifications(fetchedItems);
+        },
+        error => {
+          console.error("********* Error fetching Firestore data: ", error);
+        }
+      );
+
+    return () => unsubscribe();
+  }, []);
+
+  useEffect(() => {
+    console.log(" Setting up push notifications...");
+
     PushNotification.configure({
-      onNotification: function (notification) {
-        console.log('Notification Received:', notification);
+      onNotification: (notification) => {
+        console.log(" Notification Received:", notification);
       },
       popInitialNotification: true,
       requestPermissions: true,
     });
 
-    // Create a notification channel (Android only)
-    PushNotification.createChannel(
-      {
-        channelId: 'item-alerts',
-        channelName: 'Item Alerts',
-        channelDescription: 'Notifications for item expiration and stock updates',
-        importance: 4,
-        vibrate: true,
-      },
-      (created) => console.log(`Channel created: ${created}`)
-    );
+    checkAndCreateNotificationChannel();
+  }, []);
 
-    // Check for notifications on component mount
-    refreshNotifications();
-  }, [items]);
+  const checkAndCreateNotificationChannel = () => {
+    PushNotification.getChannels((channelIds) => {
+      console.log(" Existing Notification Channels:", channelIds);
 
-  const refreshNotifications = () => {
+      if (!channelIds.includes('item-alerts')) {
+        console.log(" Creating Notification Channel...");
+        PushNotification.createChannel(
+          {
+            channelId: 'item-alerts',
+            channelName: 'Item Alerts',
+            channelDescription: 'Notifications for item expiration and stock updates',
+            importance: PushNotification.Importance.HIGH,
+            vibrate: true,
+          },
+          (created) => console.log(created ? "Notification Channel created." : " Notification Channel creation failed.")
+        );
+      } else {
+        console.log("Notification Channel already exists.");
+      }
+    });
+  };
+
+  const refreshNotifications = (itemsToCheck = items) => {
+    if (!itemsToCheck.length) {
+      console.log("No items to check for notifications.");
+      return;
+    }
+
+    console.log("Checking items for notifications...");
     const newNotifications = [];
     const currentDate = new Date();
 
-    items.forEach((item) => {
-      // Check for out-of-stock items
+    itemsToCheck.forEach((item) => {
       if (item.qty === 0) {
-        newNotifications.push({
-          id: `${item.id}-stock`,
-          title: 'Stock Alert',
-          message: `${item.name} is out of stock.`,
-        });
-
-        // Trigger a push notification
-        PushNotification.localNotification({
-          channelId: 'item-alerts',
-          title: 'Stock Alert',
-          message: `${item.name} is out of stock.`,
-        });
+        addNotification(newNotifications, `${item.id}-stock`, 'Stock Alert', `${item.name} is out of stock.`);
       }
 
-      // Check for items close to expiration (within 7 days)
-      const expireDate = new Date(item.expireDate);
-      const timeDifference = expireDate - currentDate;
-      const daysToExpire = timeDifference / (1000 * 60 * 60 * 24);
-
-      if (daysToExpire > 0 && daysToExpire <= 7) {
-        newNotifications.push({
-          id: `${item.id}-expire`,
-          title: 'Expiration Alert',
-          message: `${item.name} expires in ${Math.ceil(daysToExpire)} days!`,
-        });
-
-        // Trigger a push notification
-        PushNotification.localNotification({
-          channelId: 'item-alerts',
-          title: 'Expiration Alert',
-          message: `${item.name} expires in ${Math.ceil(daysToExpire)} days!`,
-        });
+      const expireDate = item.expireDate ? new Date(item.expireDate) : null;
+      if (expireDate && expireDate > currentDate && (expireDate - currentDate) / (1000 * 60 * 60 * 24) <= 7) {
+        addNotification(newNotifications, `${item.id}-expire`, 'Expiration Alert', `${item.name} expires in ${Math.ceil((expireDate - currentDate) / (1000 * 60 * 60 * 24))} days!`);
       }
     });
 
     setNotifications(newNotifications);
   };
 
-  // Delete a notification
+  const addNotification = (list, id, title, message) => {
+    console.log(`⚠️ ${title}: ${message}`);
+    list.push({ id, title, message });
+
+    PushNotification.localNotification({
+      channelId: 'item-alerts',
+      title,
+      message,
+    });
+  };
+
   const deleteNotification = (id) => {
+    console.log(`Deleting notification: ${id}`);
     setNotifications((prev) => prev.filter((notif) => notif.id !== id));
     Alert.alert('Notification deleted');
   };
 
-  // Render each notification item
   const renderNotification = ({ item }) => (
     <TouchableOpacity
       style={styles.notificationItem}
@@ -108,18 +137,16 @@ export default function NotificationScreen(navigation) {
 
   return (
     <BackgroundFlex>
-      <View>
-        <HeaderWithIcon title="Notifications" MoveTo='Dashboard' navigation={navigation} />
+      <View style={{ width: '100%', flex: 1 }}>
+        <HeaderWithIcon title="Notifications" MoveTo="Dashboard" navigation={navigation} />
         <FlatList
           data={notifications}
           keyExtractor={(item) => item.id}
           renderItem={renderNotification}
         />
-        <TouchableOpacity onPress={refreshNotifications}>
-          <Text>
-          Refresh
-          </Text>
-          </TouchableOpacity>
+        <TouchableOpacity style={styles.refreshIcon} onPress={() => refreshNotifications()}>
+          <Image source={require('../../assets/Refresh.png')} style={styles.iconImage} />
+        </TouchableOpacity>
         <NavBar navigation={navigation} />
       </View>
     </BackgroundFlex>
@@ -127,13 +154,8 @@ export default function NotificationScreen(navigation) {
 }
 
 const styles = StyleSheet.create({
-  header: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    marginBottom: 20,
-    textAlign: 'center',
-  },
   notificationItem: {
+    width: '100%',
     padding: 15,
     backgroundColor: '#fff',
     marginBottom: 10,
@@ -150,5 +172,14 @@ const styles = StyleSheet.create({
   message: {
     fontSize: 16,
     color: '#666',
+  },
+  refreshIcon: {
+    position: 'absolute',
+    top: 10,
+    right: 15,
+  },
+  iconImage: {
+    width: 40,
+    height: 40,
   },
 });
