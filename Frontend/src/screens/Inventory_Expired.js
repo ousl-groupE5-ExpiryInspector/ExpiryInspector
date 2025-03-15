@@ -7,49 +7,43 @@ import NumberValue from '../components/NumberValue';
 import NavBar from '../components/navigationBar';
 import TopBarButtons from '../components/TopBarButtons';
 import CoverNums from '../components/CoverNums';
+import firestore from '@react-native-firebase/firestore';
+import auth from '@react-native-firebase/auth';
 
 export default function InventoryExpired({ navigation }) {
-  const moveExpiredPress = () => {
-    navigation.navigate('InventoryExpired');
-  };
-
-  const moveAvailablePress = () => {
-    navigation.navigate('InventoryAvailable');
-  };
-
-  const moveOutOfStockPress = () => {
-    navigation.navigate('InventoryOutOfStock');
-  };
-
   const [expiredCounts, setExpiredCounts] = useState([]);
-  
-  const allItems = [
-    { id: 1, category: 'Dairy', name: 'Milk', qty: 10, expireDate: '2024-09-20', value: 30 },
-    { id: 2, category: 'Dairy', name: 'Cheese', qty: 5, expireDate: '2024-09-30', value: 50 },
-    { id: 3, category: 'Spices', name: 'Turmeric', qty: 8, expireDate: '2025-01-01', value: 20 },
-    { id: 4, category: 'Spices', name: 'Cumin', qty: 12, expireDate: '2025-03-15', value: 40 },
-    { id: 5, category: 'Glossary', name: 'Flour', qty: 20, expireDate: '2023-09-10', value: 25 },
-    { id: 6, category: 'Glossary', name: 'Sugar', qty: 15, expireDate: '2024-12-25', value: 60 },
-    { id: 2, category: 'Beverages', name: 'Orange Juice', qty: 3, expireDate: '2024-08-30', value: 40 },
-    { id: 3, category: 'Grains', name: 'Oats', qty: 2, expireDate: '2024-09-13', value: 500 },
-    { id: 3, category: 'Sanitary', name: 'Soap', qty: 10, expireDate: '2024-05-01', value: 150 },
-
-  ];
+  const userId = auth().currentUser?.uid;
 
   useEffect(() => {
-    const currentDate = new Date();
-    const categories = [...new Set(allItems.map(item => item.category))];
+    if (!userId) return;
 
-    const counts = categories.map(category => {
-      const expiredItemsCount = allItems.filter(
-        item => item.category === category && new Date(item.expireDate) < currentDate
-      ).length;
+    const fetchExpiredItems = async () => {
+      try {
+        const snapshot = await firestore()
+          .collection('items')
+          .where('userId', '==', userId)
+          .get();
 
-      return { category, expiredCount: expiredItemsCount };
-    });
+        const currentDate = new Date();
+        const expiredItems = snapshot.docs
+          .map(doc => ({ id: doc.id, ...doc.data() }))
+          .filter(item => new Date(item.expireDate) < currentDate);
 
-    setExpiredCounts(counts);
-  }, []);
+        const categories = [...new Set(expiredItems.map(item => item.category))];
+
+        const counts = categories.map(category => {
+          const expiredItemsCount = expiredItems.filter(item => item.category === category).length;
+          return { category, expiredCount: expiredItemsCount };
+        });
+
+        setExpiredCounts(counts);
+      } catch (error) {
+        console.error("Error fetching expired items: ", error);
+      }
+    };
+
+    fetchExpiredItems();
+  }, [userId]);
 
   const renderItem = ({ item }) => (
     <View style={styles.categoryItem}>
@@ -61,14 +55,12 @@ export default function InventoryExpired({ navigation }) {
 
   return (
     <BackgroundFlex>
-      <HeaderWithIcon title="Stocks" MoveTo='Dashboard' navigation={navigation} />
-
-      <TopBarButtons style={{padding:-20}}
-        onExpiredPress={moveExpiredPress}
-        onAvailablePress={moveAvailablePress}
-        onOutOfStockPress={moveOutOfStockPress}
+      <HeaderWithIcon title="Stocks" MoveTo="Dashboard" navigation={navigation} />
+      <TopBarButtons
+        onExpiredPress={() => navigation.navigate('InventoryExpired')}
+        onAvailablePress={() => navigation.navigate('InventoryAvailable')}
+        onOutOfStockPress={() => navigation.navigate('InventoryOutOfStock')}
       />
-
       <FlatList
         data={expiredCounts}
         keyExtractor={(item, index) => index.toString()}
