@@ -7,50 +7,40 @@ import NumberValue from '../components/NumberValue';
 import NavBar from '../components/navigationBar';
 import TopBarButtons from '../components/TopBarButtons';
 import CoverNums from '../components/CoverNums';
+import firestore from '@react-native-firebase/firestore';
+import auth from '@react-native-firebase/auth';
 
 export default function InventoryOutOfStock({ navigation }) {
-  const moveExpiredPress = () => {
-    navigation.navigate('InventoryExpired');
-  };
-
-  const moveAvailablePress = () => {
-    navigation.navigate('InventoryAvailable');
-  };
-
-  const moveOutOfStockPress = () => {
-    navigation.navigate('InventoryOutOfStock');
-  };
-
+  const userId = auth().currentUser?.uid;
   const [outOfStockCounts, setOutOfStockCounts] = useState([]);
-  
-  const allItems = [
-    { id: 1, category: 'Dairy', name: 'Milk', qty: 10, expireDate: '2024-09-20', value: 30 },
-    { id: 2, category: 'Dairy', name: 'Cheese', qty: 5, expireDate: '2024-09-30', value: 50 },
-    { id: 3, category: 'Spices', name: 'Turmeric', qty: 8, expireDate: '2025-01-01', value: 20 },
-    { id: 4, category: 'Spices', name: 'Cumin', qty: 0, expireDate: '2025-03-15', value: 40 },
-    { id: 5, category: 'Glossary', name: 'Flour', qty: 0, expireDate: '2025-05-10', value: 25 },
-    { id: 6, category: 'Glossary', name: 'Sugar', qty: 15, expireDate: '2024-12-25', value: 60 },
-    { id: 5, category: 'Beverages', name: 'Orange Juice', qty: 0, expireDate: '2025-05-10', value: 25 },
-    { id: 6, category: 'Beverages', name: 'Watermelon Juice', qty: 15, expireDate: '2024-12-25', value: 60 },
-    { id: 5, category: 'Grains', name: 'Rice', qty: 0, expireDate: '2025-05-10', value: 25 },
-    { id: 6, category: 'Grains', name: 'Dhal', qty: 0, expireDate: '2024-12-25', value: 60 },
-    { id: 5, category: 'Sanitary', name: 'Soap', qty: 0, expireDate: '2025-05-10', value: 25 },
-    { id: 6, category: 'Sanitary', name: 'shampoo', qty: 15, expireDate: '2024-12-25', value: 60 },
-  ];
 
   useEffect(() => {
-    const categories = [...new Set(allItems.map(item => item.category))];
+    if (!userId) return;
 
-    const counts = categories.map(category => {
-      const outOfStockItemsCount = allItems.filter(
-        item => item.category === category && item.qty === 0
-      ).length;
+    const unsubscribe = firestore()
+      .collection('items')
+      .where('userId', '==', userId)
+      .where('qty', '==', 0)
+      .onSnapshot(snapshot => {
+        const fetchedItems = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
 
-      return { category, outOfStockCount: outOfStockItemsCount };
-    });
+        // Group by category and count out-of-stock items
+        const categoryCounts = fetchedItems.reduce((acc, item) => {
+          acc[item.category] = (acc[item.category] || 0) + 1;
+          return acc;
+        }, {});
 
-    setOutOfStockCounts(counts);
-  }, []);
+        // Convert object to array for FlatList
+        const formattedCounts = Object.keys(categoryCounts).map(category => ({
+          category,
+          outOfStockCount: categoryCounts[category],
+        }));
+
+        setOutOfStockCounts(formattedCounts);
+      });
+
+    return () => unsubscribe();
+  }, [userId]);
 
   const renderItem = ({ item }) => (
     <View style={styles.categoryItem}>
@@ -64,17 +54,19 @@ export default function InventoryOutOfStock({ navigation }) {
     <BackgroundFlex>
       <HeaderWithIcon title="Stocks" MoveTo='Dashboard' navigation={navigation} />
 
-      <TopBarButtons style={{padding:-20}}
-        onExpiredPress={moveExpiredPress}
-        onAvailablePress={moveAvailablePress}
-        onOutOfStockPress={moveOutOfStockPress}
+      <TopBarButtons
+        onExpiredPress={() => navigation.navigate('InventoryExpired')}
+        onAvailablePress={() => navigation.navigate('InventoryAvailable')}
+        onOutOfStockPress={() => navigation.navigate('InventoryOutOfStock')}
       />
+
       <FlatList
         data={outOfStockCounts}
         keyExtractor={(item, index) => index.toString()}
         renderItem={renderItem}
         contentContainerStyle={styles.listContainer}
       />
+
       <NavBar navigation={navigation} />
     </BackgroundFlex>
   );
