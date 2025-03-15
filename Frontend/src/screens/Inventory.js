@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, FlatList, StyleSheet, TouchableOpacity } from 'react-native';
 import firestore from '@react-native-firebase/firestore';
 import auth from '@react-native-firebase/auth';
-import { useFocusEffect } from '@react-navigation/native'; // Import useFocusEffect
+import { useFocusEffect } from '@react-navigation/native'; 
 import BackgroundFlex from '../components/BackgroundFlex';
 import HeaderWithIcon from '../components/HeaderWithIcon';
 import TopBarButtons from '../components/TopBarButtons';
@@ -14,14 +14,14 @@ import NavBar from '../components/navigationBar';
 
 export default function InventoryScreen({ navigation }) {
   const [stocks, setStocks] = useState([]);
-  const userId = auth().currentUser?.uid; // Get the current logged-in user ID
+  const userId = auth().currentUser?.uid; // current  user ID
 
-  // Function to fetch data
+  // Function fetch data
   const fetchData = async () => {
-    if (!userId) return; // If no user is logged in, return
+    if (!userId) return; 
 
     try {
-      // 1️⃣ Get user categories from the 'users' collection
+      // categories from the 'users' 
       const userDoc = await firestore().collection('users').doc(userId).get();
       if (!userDoc.exists) {
         console.log('No user document found');
@@ -31,22 +31,22 @@ export default function InventoryScreen({ navigation }) {
       const userCategories = userDoc.data().categories || [];
       console.log('User Categories:', userCategories);
 
-      // 2️⃣ Get items filtered by the current userId (userId in each item document)
+      // items filtered by  current userId
       const itemsSnapshot = await firestore()
         .collection('items')
-        .where('userId', '==', userId) // Filter items by the userId
+        .where('userId', '==', userId) 
         .get();
 
       const allItems = itemsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
       console.log('All Items for User:', allItems);
 
-      // 3️⃣ Filter items based on the user's categories
+      //  Filter by categories
       const filteredItems = allItems.filter(item =>
-        userCategories.some(category => category.name === item.category) // Match category with user's categories
+        userCategories.some(category => category.name === item.category) // Match categories
       );
       console.log('Filtered Items:', filteredItems);
 
-      // 4️⃣ Process each category
+      //  Process categorires
       const formattedData = userCategories.map((category, index) => {
         const categoryItems = filteredItems.filter(item => item.category === category.name);
 
@@ -74,11 +74,11 @@ export default function InventoryScreen({ navigation }) {
     }
   };
 
-  // Use useFocusEffect to refresh data when navigating to the page
+  // refresh data 
   useFocusEffect(
     React.useCallback(() => {
       fetchData();
-    }, [userId]) // Re-fetch data when userId changes
+    }, [userId]) 
   );
 
   const renderItem = ({ item }) => (

@@ -5,7 +5,7 @@ import { useNavigationState } from '@react-navigation/native';
 export default function TopBarButtons2({ onBudgetPress, onSavedPress }) {
   const [activePage, setActivePage] = useState('BUDGET');
 
-  // Get the current route name from navigation state
+  // current route name from navigation
   const currentRouteName = useNavigationState(state => state.routes[state.index].name);
 
   useEffect(() => {

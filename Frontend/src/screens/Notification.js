@@ -8,28 +8,29 @@ import { firebase } from '@react-native-firebase/firestore';
 import auth from '@react-native-firebase/auth';
 
 export default function NotificationScreen({ navigation }) {
-  const [notifications, setNotifications] = useState([]);
-  const [items, setItems] = useState([]);
+  const [notifications, setNotifications] = useState([]); // store notifications
+  const [items, setItems] = useState([]); // State to store items from Firestore
 
   useEffect(() => {
-    const userId = auth().currentUser?.uid;
+    const userId = auth().currentUser?.uid; // current user's ID
     console.log(" Checking authentication...", userId);
 
     if (!userId) {
       console.error(" User not authenticated, cannot fetch items.");
-      return;
+      return; // Exit if not authenticated
     }
 
     console.log(" User authenticated:", userId);
     console.log(" Fetching items from Firestore...");
 
+    // call items from Firestore
     const unsubscribe = firebase.firestore()
-      .collection('items') // firebase.firestore()
-      .where('userId', '==', userId)
+      .collection('items') // collection 
+      .where('userId', '==', userId) 
       .onSnapshot(
         snapshot => {
           if (!snapshot.empty) {
-            console.log(" *Firestore connection successful.*");
+            console.log(" **Firestore connection successful.**");
           } else {
             console.warn(" No items found for this user.");
           }
@@ -37,20 +38,21 @@ export default function NotificationScreen({ navigation }) {
           const fetchedItems = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
           console.log(" ### Firestore Data Fetched ###:", fetchedItems);
 
-          setItems(fetchedItems);
-          refreshNotifications(fetchedItems);
+          setItems(fetchedItems); // Update state
+          refreshNotifications(fetchedItems); // Refresh notifications
         },
         error => {
           console.error("********* Error fetching Firestore data: ", error);
         }
       );
 
-    return () => unsubscribe();
+    return () => unsubscribe(); // Clean up Firestore listener
   }, []);
 
   useEffect(() => {
     console.log(" Setting up push notifications...");
 
+    // Configure
     PushNotification.configure({
       onNotification: (notification) => {
         console.log(" Notification Received:", notification);
@@ -62,12 +64,14 @@ export default function NotificationScreen({ navigation }) {
     checkAndCreateNotificationChannel();
   }, []);
 
+ 
   const checkAndCreateNotificationChannel = () => {
     PushNotification.getChannels((channelIds) => {
       console.log(" Existing Notification Channels:", channelIds);
 
       if (!channelIds.includes('item-alerts')) {
         console.log(" Creating Notification Channel...");
+        // Create 'item-alerts' channel
         PushNotification.createChannel(
           {
             channelId: 'item-alerts',
@@ -84,10 +88,11 @@ export default function NotificationScreen({ navigation }) {
     });
   };
 
+  // Refresh
   const refreshNotifications = (itemsToCheck = items) => {
     if (!itemsToCheck.length) {
       console.log("No items to check for notifications.");
-      return;
+      return; // Exit if no items
     }
 
     console.log("Checking items for notifications...");
@@ -96,22 +101,26 @@ export default function NotificationScreen({ navigation }) {
 
     itemsToCheck.forEach((item) => {
       if (item.qty === 0) {
+        // Create stock alert
         addNotification(newNotifications, `${item.id}-stock`, 'Stock Alert', `${item.name} is out of stock.`);
       }
 
       const expireDate = item.expireDate ? new Date(item.expireDate) : null;
       if (expireDate && expireDate > currentDate && (expireDate - currentDate) / (1000 * 60 * 60 * 24) <= 30) {
+        // Create expiration alert
         addNotification(newNotifications, `${item.id}-expire`, 'Expiration Alert', `${item.name} expires in ${Math.ceil((expireDate - currentDate) / (1000 * 60 * 60 * 24))} days!`);
       }
     });
 
-    setNotifications(newNotifications);
+    setNotifications(newNotifications); // Update notifications
   };
 
+  // list and trigger local notification
   const addNotification = (list, id, title, message) => {
-    console.log(`⚠️ ${title}: ${message}`);
+    console.log(` ${title}: ${message}`);
     list.push({ id, title, message });
 
+    // Trigger local notification
     PushNotification.localNotification({
       channelId: 'item-alerts',
       title,
@@ -119,16 +128,18 @@ export default function NotificationScreen({ navigation }) {
     });
   };
 
+  // Delete
   const deleteNotification = (id) => {
     console.log(`Deleting notification: ${id}`);
-    setNotifications((prev) => prev.filter((notif) => notif.id !== id));
+    setNotifications((prev) => prev.filter((notif) => notif.id !== id)); // Remove from state
     Alert.alert('Notification deleted');
   };
 
+  // Render notification item in the list
   const renderNotification = ({ item }) => (
     <TouchableOpacity
       style={styles.notificationItem}
-      onLongPress={() => deleteNotification(item.id)}
+      onLongPress={() => deleteNotification(item.id)} // long press
     >
       <Text style={styles.title}>{item.title}</Text>
       <Text style={styles.message}>{item.message}</Text>
@@ -140,9 +151,9 @@ export default function NotificationScreen({ navigation }) {
       <View style={{ width: '100%', flex: 1 }}>
         <HeaderWithIcon title="Notifications" MoveTo="Dashboard" navigation={navigation} />
         <FlatList
-          data={notifications}
+          data={notifications} // Render notifications state
           keyExtractor={(item) => item.id}
-          renderItem={renderNotification}
+          renderItem={renderNotification} // Use renderNotification function
         />
         <TouchableOpacity style={styles.refreshIcon} onPress={() => refreshNotifications()}>
           <Image source={require('../../assets/Refresh.png')} style={styles.iconImage} />

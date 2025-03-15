@@ -59,8 +59,21 @@ AndroidManifest.xml
     android:name="com.dieam.reactnativepushnotification.notification_channel_description"
     android:value="Notifications for item updates." />
 
+
+------------timely notification---------------
+
+npm install react-native-background-fetch
  
 ---------------------other--------------------------
 npx react-native doctor
+
+---------------relese----------------
+https://reactnative.dev/docs/signed-apk-android
+
+cd android
+
+./gradlew clean
+
+./gradlew assembleRelease
 
 -- Writen by Pradeep--

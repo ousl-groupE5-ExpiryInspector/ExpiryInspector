@@ -169,6 +169,7 @@ export default function CameraScreen({ route, navigation }) {
         setImage(uri);
 
         try {
+          // test read with package
           const recognizedText = await TextRecognition.recognize(uri);
 
           if (recognizedText && recognizedText.text) {
@@ -230,7 +231,7 @@ export default function CameraScreen({ route, navigation }) {
     });
   };
 
-  // Functions to extract data
+  //  extract data
   const extractExpirationDates = (text) => {
     const expirationDateRegex = /(?:exp|EXP)\s*:? ?\s*(\d{1,2}[-./]\d{1,2}[-./]\d{2,4}|\d{4}[-./]\d{1,2}[-./]\d{1,2})/gi;
     const matches = text.match(expirationDateRegex);

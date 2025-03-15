@@ -37,7 +37,6 @@ export default function SignUpScreen({ navigation }) {
   
       const defaultProfilePic = '';
   
-      // Default categories stored as a field inside user document
       const defaultCategories = [
         { name: 'Dairy', description: 'Milk, Cheese, Yogurt, and more.', items: [] },
         { name: 'Spices', description: 'Various spices including turmeric, cumin, and more.', items: [] },
@@ -53,10 +52,10 @@ export default function SignUpScreen({ navigation }) {
         email: email,
         profile_picture: defaultProfilePic,
         createdAt: firestore.FieldValue.serverTimestamp(),
-        categories: defaultCategories, // Store categories as an array field inside user doc
+        categories: defaultCategories, // Store categories as array 
       });
   
-      // Update Firebase authentication profile
+      // Update Firebase 
       await user.updateProfile({ displayName: name, photoURL: defaultProfilePic });
   
       Alert.alert('Success', 'User registered successfully.');
