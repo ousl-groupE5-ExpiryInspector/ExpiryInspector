@@ -7,7 +7,7 @@ export default function Title3({ children }) {
 
 const styles = StyleSheet.create({
   title: {
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: '600',
     color: 'black',
   },
