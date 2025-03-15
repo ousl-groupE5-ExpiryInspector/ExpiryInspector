@@ -1,5 +1,3 @@
-// Login page
-
 import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Alert } from 'react-native';
 import InputFieldCom from '../components/inputField';
@@ -8,43 +6,57 @@ import ImageComponentAuth from '../components/ImageComponentAuth';
 import HeaderTextComponent from '../components/HeaderTextComponent';
 import BackgroundFlex from '../components/BackgroundFlex';
 import auth from '@react-native-firebase/auth'; 
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function LoginScreen({ navigation }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
   // Handle user login
-  const handleLogin = () => {
-    // Validate input fields
+  const handleLogin = async () => {
+    console.log('🔹 Attempting login for:', email);
+  
     if (!email || !password) {
+      console.log('❌ Error: Missing email or password.');
       Alert.alert('Error', 'Email and password are required.');
       return;
     }
-
+  
     auth()
       .signInWithEmailAndPassword(email, password)
-      .then(userCredentials => {
+      .then(async userCredentials => {
         const user = userCredentials.user;
-        console.log('Logged in with:', user.email);
-        // Navigate to the Dashboard after successful login
+        console.log('✅ Login Successful!');
+        console.log('👤 User Email:', user.email);
+        console.log('🆔 User UID:', user.uid);
+  
+        // Save UID to AsyncStorage
+        // Save UID to AsyncStorage
+      try {
+        await AsyncStorage.setItem('userUID', user.uid);
+        console.log('💾 UID saved to AsyncStorage:', user.uid);
+      } catch (error) {
+        console.error('❌ Error saving UID to AsyncStorage:', error);
+      }
+
+  
+        // Navigate to the Dashboard
+        console.log('🔄 Navigating to Dashboard...');
         navigation.navigate('Dashboard');
       })
       .catch(error => {
+        console.log('❌ Login Error:', error.message);
         Alert.alert('Login Error', error.message);
       });
   };
-  const handleCamera = () => {
-    // Redirect to camera screen
-    navigation.navigate('Camara');
-  };
 
   const navigateToSignUp = () => {
-    // Redirect to Sign Up screen
+    console.log('🔄 Navigating to SignUp...');
     navigation.navigate('SignUp');
   };
 
   const navigateToForgotPW = () => {
-    // Redirect to Forgot Password screen
+    console.log('🔄 Navigating to Forgot Password...');
     navigation.navigate('FogotPassword');
   };
 
@@ -74,8 +86,6 @@ export default function LoginScreen({ navigation }) {
       </TouchableOpacity>
 
       <ButtonComponentAuth title="Login" onPress={handleLogin} />
-      {/* <ButtonComponentAuth title="cam" onPress={handleCamera} /> */}
-      
 
       <View style={styles.rowContainer}>
         <Text style={styles.footerText}>Don't have an account? </Text>
@@ -83,10 +93,10 @@ export default function LoginScreen({ navigation }) {
           <Text style={{ color: 'white', fontWeight: 'bold' }}> Create account</Text>
         </TouchableOpacity>
       </View>
-
     </BackgroundFlex>
   );
 }
+
 
 const styles = StyleSheet.create({
   rowContainer: {

@@ -1,101 +1,186 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, Image, TouchableOpacity, TextInput } from 'react-native';
-import { launchImageLibrary } from 'react-native-image-picker';
+import React, { useEffect, useState } from 'react';
+import { View, Text, StyleSheet, ActivityIndicator, TextInput, Button, Alert, Image, TouchableOpacity } from 'react-native';
 import BackgroundFlex from '../components/BackgroundFlex';
 import HeaderWithIcon from '../components/HeaderWithIcon';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { doc, getDoc, updateDoc } from 'firebase/firestore';
+import { launchImageLibrary } from 'react-native-image-picker';
+import { signOut, onAuthStateChanged } from 'firebase/auth';
+import { auth, firestore } from '../auth/firebaseConfig';
 
 export default function UserAccount({ navigation }) {
+  const [userData, setUserData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [profilePicture, setProfilePicture] = useState(null);
+  const [userId, setUserId] = useState(null);
 
-  const navigateToLogin = () => {
-    navigation.navigate('Login');
+  const saveUserId = async (userId) => {
+    try {
+      await AsyncStorage.setItem('userUId', userId);
+      console.log('✅ User ID saved to AsyncStorage:', userId);
+    } catch (error) {
+      console.error('❌ Error saving user ID:', error);
+    }
   };
-  
-  const [userData, setUserData] = useState({
-    name: '',
-    email: '',
-    image: null,
-  });
+
+  const getUserIdFromStorage = async () => {
+    try {
+      const storedUserId = await AsyncStorage.getItem('userUID');
+      return storedUserId || null;
+    } catch (error) {
+      console.error('❌ Error retrieving user ID:', error);
+      return null;
+    }
+  };
+
+  const fetchUserDetails = async (uid) => {
+    try {
+      console.log('📌 Fetching User Data for UID:', uid);
+      const userDocRef = doc(firestore, 'users', uid);
+      const userDoc = await getDoc(userDocRef);
+
+      if (userDoc.exists()) {
+        const userData = userDoc.data();
+        setUserData(userData);
+        setName(userData.name || '');
+        setEmail(userData.email || '');
+        setProfilePicture(userData.profile_picture || null);
+        setUserId(uid);
+        console.log('✅ User Data:', userData);
+      } else {
+        console.warn('⚠️ User document not found in Firestore!');
+      }
+    } catch (error) {
+      console.error('❌ Error fetching user details:', error.message);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    // Simulate fetching default user data from an external database
-    const fetchUserData = async () => {
-      const defaultData = {
-        name: 'Sahani Weerasinghe',
-        email: 'sahani123@ousl.com',
-        image: null,
-      };
-      setUserData(defaultData);
+    const checkUser = async () => {
+      const storedUserId = await getUserIdFromStorage();
+      if (storedUserId) {
+        fetchUserDetails(storedUserId);
+      } else {
+        setUserData(null);
+        setLoading(false);
+      }
     };
 
-    fetchUserData();
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        await saveUserId(user.uid);
+        fetchUserDetails(user.uid);
+      } else {
+        console.warn('⚠️ No user logged in. Checking AsyncStorage...');
+        checkUser();
+      }
+    });
+
+    return () => unsubscribe();
   }, []);
 
+  const handleSave = async () => {
+    if (!userId) {
+      Alert.alert('Error', 'User ID not found.');
+      return;
+    }
+
+    try {
+      const userDocRef = doc(firestore, 'users', userId);
+      await updateDoc(userDocRef, { name, email });
+      Alert.alert('Success', 'User data updated successfully!');
+      console.log('✅ User data updated:', { name, email });
+    } catch (error) {
+      console.error('❌ Error updating user data:', error);
+      Alert.alert('Error', 'Failed to update user data.');
+    }
+  };
+
+  const handleLogout = async () => {
+    try {
+      await signOut(auth);
+      await AsyncStorage.removeItem('userUId');
+      setUserData(null);
+      setUserId(null);
+      Alert.alert('Logged Out', 'You have been logged out successfully.');
+      console.log('✅ User logged out');
+    } catch (error) {
+      console.error('❌ Error logging out:', error);
+      Alert.alert('Error', 'Failed to log out.');
+    }
+    navigation.navigate('Login');
+  };
+
   const pickImage = () => {
-    launchImageLibrary({ mediaType: 'photo', quality: 1 }, response => {
-      if (!response.didCancel && !response.error) {
-        const imageUri = response.assets[0].uri;
-        setUserData({ ...userData, image: imageUri });
+    launchImageLibrary({ mediaType: 'photo', quality: 1, includeBase64: true }, response => {
+      if (response.assets && response.assets.length > 0) {
+        const base64Image = `data:image/jpeg;base64,${response.assets[0].base64}`;
+        console.log(' Base64 Image Selected');
+        setProfilePicture(base64Image);
+        saveImageToFirestore(base64Image);
       }
     });
   };
 
-  const handleUpdateUser = () => {
-    console.log('Updated User Data:', userData);
-    // Logic to update user data in the database can be implemented here
-    alert('User information updated successfully!');
+  const saveImageToFirestore = async (base64Image) => {
+    if (!userId) {
+      Alert.alert('Error', 'User ID not found.');
+      return;
+    }
+
+    try {
+      const userDocRef = doc(firestore, 'users', userId);
+      await updateDoc(userDocRef, { profile_picture: base64Image });
+      Alert.alert('Success', 'Profile picture updated!');
+      console.log('✅ Base64 Image saved to Firestore');
+    } catch (error) {
+      console.error('❌ Error saving image to Firestore:', error);
+      Alert.alert('Error', 'Failed to save image.');
+    }
   };
 
   return (
     <BackgroundFlex>
-      {/* Header with Back Icon */}
-      <HeaderWithIcon
-        title="User Profile"
-        MoveTo="Dashboard"
-        navigation={navigation}
-      />
-
+      <HeaderWithIcon title="User Profile" MoveTo="Dashboard" navigation={navigation} />
       <View style={styles.container}>
-        {/* User Avatar */}
-        <TouchableOpacity onPress={pickImage}>
-          {userData.image ? (
-            <Image source={{ uri: userData.image }} style={styles.userAccountImg} />
-          ) : (
-            <Image source={require('../../assets/userAccount_pic.png')} style={styles.userAccountImg} />
-          )}
-        </TouchableOpacity>
+        {loading ? (
+          <ActivityIndicator size="large" color="blue" />
+        ) : userData ? (
+          <>
+            <TouchableOpacity onPress={pickImage}>
+            <Image 
+              source={profilePicture && profilePicture.trim() !== "" ? 
+              { uri: profilePicture } : 
+              require('../../assets/userAccount_pic.png')} 
+                style={styles.userAccountImg} />
+            </TouchableOpacity>
 
-        {/* Update Name and Email */}
-        <View style={styles.infoContainer}>
-          <Text style={styles.label}>Name:</Text>
-          <TextInput
-            style={styles.infoText}
-            value={userData.name}
-            onChangeText={(text) => setUserData({ ...userData, name: text })}
-            placeholder="Enter your name"
-          />
+            <View style={styles.infoContainer}>
+              <Text style={styles.label}>Name:</Text>
+              <TextInput style={styles.infoText} value={name} onChangeText={setName} placeholder="Enter Name" />
 
-          <Text style={styles.label}>Email:</Text>
-          <TextInput
-            style={styles.infoText}
-            value={userData.email}
-            onChangeText={(text) => setUserData({ ...userData, email: text })}
-            placeholder="Enter your email"
-            keyboardType="email-address"
-          />
-        </View>
+              <Text style={styles.label}>Email:</Text>
+              <TextInput style={styles.infoText} value={email} onChangeText={setEmail} placeholder="Enter Email" keyboardType="email-address" />
+            </View>
 
-        {/* Save Button */}
-        <TouchableOpacity style={styles.logoutButton} onPress={handleUpdateUser}>
-          <Text style={styles.buttonText}>Save Changes</Text>
-        </TouchableOpacity>
+            <TouchableOpacity style={styles.logoutButton} onPress={handleSave}>
+              <Text style={styles.buttonText}>Save Changes</Text>
+            </TouchableOpacity>
 
-        {/* Logout and Delete Account Buttons */}
-        <TouchableOpacity style={styles.logoutButton} onPress={navigateToLogin}>
-          <Text style={styles.buttonText}>Logout</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.deleteButton}>
-          <Text style={styles.buttonText}>Delete account</Text>
-        </TouchableOpacity>
+            <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
+              <Text style={styles.buttonText}>Logout</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.deleteButton}>
+              <Text style={styles.buttonText}>Delete account</Text>
+            </TouchableOpacity>
+          </>
+        ) : (
+          <Text>No user logged in</Text>
+        )}
       </View>
     </BackgroundFlex>
   );
@@ -111,8 +196,8 @@ const styles = StyleSheet.create({
   },
   userAccountImg: {
     width: 200,
-    height: 200,
-    borderRadius: 75,
+    height: 201,
+    borderRadius: 100,
     resizeMode: 'contain',
     marginBottom: 30,
   },

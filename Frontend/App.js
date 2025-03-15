@@ -13,14 +13,16 @@ import InventoryOutOFStock from './src/screens/Inventory_OutOfStock';
 import ItemList from './src/screens/ItemList';
 import ItemDetail from './src/screens/ItemDetail';
 import BudgetScreen from './src/screens/BudgetPlanner';
+import BudgetListScreen from './src/screens/BudgetListScreen';
 import FAQScreen from './src/screens/FAQ';
 import NotificationScreen from './src/screens/Notification';
 import CamaraScreen from './src/screens/Camara';
 import TutorialScreen from './src/screens/TutorialScreen';
 
 const stack = createNativeStackNavigator();
-const App=()=> {
+const App = () => {
   return (
+
   <>
   <NavigationContainer>
     <stack.Navigator initialRouteName="Welcome">

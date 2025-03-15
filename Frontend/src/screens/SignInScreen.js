@@ -19,6 +19,60 @@ export default function SignUpScreen({ navigation }) {
     console.log("Email:", email);
     console.log("Password:", password);
     console.log("Confirm Password:", confirmPassword);
+  
+    if (!name || !email || !password || !confirmPassword) {
+      Alert.alert('Error', 'All fields are required.');
+      return;
+    }
+  
+    if (password !== confirmPassword) {
+      Alert.alert('Error', 'Passwords do not match.');
+      return;
+    }
+  
+    try {
+      const userCredentials = await auth().createUserWithEmailAndPassword(email, password);
+      const user = userCredentials.user;
+      console.log('Registered with:', user.email);
+  
+      const defaultProfilePic = '';
+  
+      // Default categories stored as a field inside user document
+      const defaultCategories = [
+        { name: 'Dairy', description: 'Milk, Cheese, Yogurt, and more.', items: [] },
+        { name: 'Spices', description: 'Various spices including turmeric, cumin, and more.', items: [] },
+        { name: 'Grains', description: 'Rice, wheat, etc.', items: [] },
+        { name: 'Glossary', description: 'Other items.', items: [] },
+        { name: 'Sanitary', description: 'Sanitary items.', items: [] },
+        { name: 'Other', description: 'Other household items.', items: [] },
+      ];
+  
+      // Store user data including categories
+      await firestore().collection('users').doc(user.uid).set({
+        name: name,
+        email: email,
+        profile_picture: defaultProfilePic,
+        createdAt: firestore.FieldValue.serverTimestamp(),
+        categories: defaultCategories, // Store categories as an array field inside user doc
+      });
+  
+      // Update Firebase authentication profile
+      await user.updateProfile({ displayName: name, photoURL: defaultProfilePic });
+  
+      Alert.alert('Success', 'User registered successfully.');
+      navigation.navigate('Login');
+    } catch (error) {
+      Alert.alert('Error', error.message);
+    }
+  };
+  
+  
+
+  /* const handleRegister = async () => {
+    console.log("Name:", name);
+    console.log("Email:", email);
+    console.log("Password:", password);
+    console.log("Confirm Password:", confirmPassword);
 
     // Validate if all fields are filled
     if (!name || !email || !password || !confirmPassword) {
@@ -50,9 +104,11 @@ export default function SignUpScreen({ navigation }) {
       Alert.alert('Success', 'User registered successfully.');
       navigation.navigate('Login');
     } catch (error) {
-      Alert.alert('Registration Error', error.message);
+      {/*Alert.alert('Registration Error', error.message);}
+      Alert.alert('Success', 'User registered successfully.');
+      navigation.navigate('Login');
     }
-  };
+  }; */
 
   const navigateToLogin = () => {
     navigation.navigate('Login');
