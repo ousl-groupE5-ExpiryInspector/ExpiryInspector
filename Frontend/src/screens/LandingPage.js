@@ -6,7 +6,7 @@ export default function LandingPage({ navigation }) {
 
   const handleLanding = () => {
     // Navigate to login screen
-    navigation.navigate('Login');
+    navigation.navigate('infoScreen');
   };
 
   const handleFAQ = () => {
