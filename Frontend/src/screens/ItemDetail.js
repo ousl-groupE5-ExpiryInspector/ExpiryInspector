@@ -197,6 +197,7 @@ export default function ItemDetail({ route, navigation }) {
                 <Text>{totalValue.toFixed(2)}</Text>
               </View>
             </View>
+        
           </View>
         </View>
 

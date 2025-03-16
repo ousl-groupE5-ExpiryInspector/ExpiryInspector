@@ -12,7 +12,7 @@ export default function BackgroundFlex({ children }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FF4913',
+    backgroundColor: 'lightgreen',
     alignItems: 'center',
     justifyContent: 'center',
     padding: 0,

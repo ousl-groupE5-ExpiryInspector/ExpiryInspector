@@ -60,6 +60,7 @@ export default function InventoryExpired({ navigation }) {
         onExpiredPress={() => navigation.navigate('InventoryExpired')}
         onAvailablePress={() => navigation.navigate('InventoryAvailable')}
         onOutOfStockPress={() => navigation.navigate('InventoryOutOfStock')}
+        onOtherPress={() => navigation.navigate('Dashboard')}
       />
       <FlatList
         data={expiredCounts}

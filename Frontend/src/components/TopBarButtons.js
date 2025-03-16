@@ -16,6 +16,8 @@ export default function TopBarButtons({ onExpiredPress, onAvailablePress, onOutO
     } else if (currentRouteName === 'InventoryOutOfStock') {
       setActivePage('OUT_OF_STOCK');
     }
+      else if (currentRoutName === 'Dashboard')
+        setActivePage('Others');
   }, [currentRouteName]);
 
   return (
